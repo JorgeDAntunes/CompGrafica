@@ -9,8 +9,11 @@ import com.sun.j3d.utils.universe.SimpleUniverse;
 import java.applet.Applet;
 import java.awt.BorderLayout;
 import java.awt.GraphicsConfiguration;
+import javax.media.j3d.Appearance;
 import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Canvas3D;
+import javax.media.j3d.ColoringAttributes;
+import javax.media.j3d.Material;
 import javax.media.j3d.TransformGroup;
 
 /**
@@ -48,7 +51,12 @@ public class Projecto3D extends Applet{
         root.addChild(tg);
         
         //Object
-        
+        Appearance ap = new Appearance();
+        ap.setMaterial(new Material());
+        ColoringAttributes ca = new ColoringAttributes();
+        ca.setShadeModel(ColoringAttributes.SHADE_GOURAUD);
+        ap.setColoringAttributes(ca);
+                
         
         
         
