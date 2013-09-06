@@ -16,7 +16,10 @@ import java.applet.Applet;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.GraphicsConfiguration;
-import javax.media.j3d.Alpha;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import javax.media.j3d.*;
 import javax.media.j3d.AmbientLight;
 import javax.media.j3d.Appearance;
 import javax.media.j3d.Background;
@@ -29,6 +32,7 @@ import javax.media.j3d.PointLight;
 import javax.media.j3d.RotationInterpolator;
 import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
+import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Color3f;
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
@@ -38,7 +42,7 @@ import javax.vecmath.Vector3f;
  *
  * @author Jorge
  */
-public class Projecto3D extends Applet{
+public class Projecto3D extends Applet implements MouseListener, MouseMotionListener{
 
     /**
      * @param args the command line arguments
@@ -134,7 +138,7 @@ public class Projecto3D extends Applet{
         //tampo
         Box tampo = new Box(3.3f, 5.0f, 0.01f, medBlueApp);
         Transform3D trTampo = new Transform3D();
-        trTampo.set(new Vector3f(0f, 1f, 0f), 0.1f);
+        trTampo.set(new Vector3f(0f, 0f, 0f), 0.13f);
         TransformGroup tgTampo = new TransformGroup(trTampo);
         tgTampo.addChild(tampo);
         tgTampo.addChild(tgMC);
@@ -151,10 +155,7 @@ public class Projecto3D extends Applet{
 //        rodar.setSchedulingBounds(bounds);
 //        tg.addChild(rodar);
         
-//        //Fundo
-//        Background bb = new Background(0f, 1f, 1f);
-//        bb.setApplicationBounds(bounds);
-//        root.addChild(bb);
+
         
         //criar rotação behavior (botão esquerdo do rato)
         MouseRotate behavior = new MouseRotate();
@@ -183,15 +184,43 @@ public class Projecto3D extends Applet{
         caLAzul.setColor(cLAzul);
         lAzul.setColoringAttributes(caLAzul);
         
-        //Criar esfera
-        Sphere bola = new Sphere(0.25f, blueApp);
+        //Criar Bola
+        
+        TransformGroup tgBola = new TransformGroup();
+        tgBola.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+        
         Transform3D trBola = new Transform3D();
-        trBola.setTranslation(new Vector3f(3.3f,0f,0.5f));
-        TransformGroup tgBola = new TransformGroup(trBola);
+        trBola.setTranslation(new Vector3f(0f, 0.0f, 0.05f));
+        trBola.setRotation(new AxisAngle4d(1.0, 0.0, 0.0, Math.PI / 2.0));
+        tgBola.setTransform(trBola);        
+        
+        Sphere bola = new Sphere(0.05f, blueApp);
+        bola.setCapability(Appearance.ALLOW_COLORING_ATTRIBUTES_WRITE);
         tgBola.addChild(bola);
-//        root.addChild(tgTampo);
+        
+        //animação
+        TransformGroup tgAnim = new TransformGroup();
+        tgAnim.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+        Transform3D trAnim = new Transform3D();
+        trAnim.setRotation(new AxisAngle4d(0.0, 0.0, 1.0, Math.PI/2));
+        
+        Alpha alph = new Alpha(-1, 10000);
+        alph.setStartTime(System.currentTimeMillis());
+        PositionInterpolator posInt = new PositionInterpolator(alph, tgAnim, trAnim, 0f, 6.1f);
+        posInt.setSchedulingBounds(bounds);
         
         
+
+        tgAnim.addChild(posInt);
+        tgAnim.addChild(tgBola);
+        tg.addChild(tgAnim);
+        
+        
+        
+//        //Fundo
+//        Background bb = new Background(1f, 1f, 1f);
+//        bb.setApplicationBounds(bounds);
+//        root.addChild(bb);
         
         //Luz
         AmbientLight luz = new AmbientLight(true, new Color3f(Color.WHITE));
@@ -199,19 +228,51 @@ public class Projecto3D extends Applet{
         root.addChild(luz);
         
         //cor
-        PointLight ptlight = new PointLight(new Color3f(Color.YELLOW),
+        PointLight ptlight = new PointLight(new Color3f(Color.red),
                 new Point3f(0f, 0f, 2f), new Point3f(1f, 0f, 0f));
         ptlight.setInfluencingBounds(bounds);
         root.addChild(ptlight);
-        PointLight ptlight2 = new PointLight(new Color3f(Color.YELLOW),
+        PointLight ptlight2 = new PointLight(new Color3f(Color.red),
                 new Point3f(-2f, 2f, 2f), new Point3f(1f, 0f, 0f));
         ptlight2.setInfluencingBounds(bounds);
         root.addChild(ptlight2);
-        
-        
-        
-        
+
         return root;
         
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent me) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void mousePressed(MouseEvent me) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent me) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent me) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void mouseExited(MouseEvent me) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent me) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent me) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }
