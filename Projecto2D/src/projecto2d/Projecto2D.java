@@ -66,19 +66,16 @@ public class Projecto2D extends JApplet implements ActionListener, ChangeListene
     private JSlider sTransparencia;
     private JTextField tMovimentos;
     private JTextField tTempo;
-    
-    
-    
     //variaveis
     private PAreaJogo pAJ;
     private float transparencia = 0.4f;
     private PLoading pLoaging;
+    private int load;
     private String opImagem = "Original";
     private PrinterJob pj;
     private int nPecas = 3; //numero de pecas
     private int velocidade = 1;
-    
-    
+
     public static void main(String[] args) {
         JFrame frame = new JFrame();
         frame.setTitle("Torre de Hanoi");
@@ -94,10 +91,18 @@ public class Projecto2D extends JApplet implements ActionListener, ChangeListene
         frame.setLocationRelativeTo(null); //applet aparecer no centro do ecrã
         frame.setResizable(false);
     }
-    
-    
+
     public void init() {
-                //***********MENU*********************
+        //******Painel Loading********
+//        pLoaging = new PLoading();
+//        pLoaging.setVisible(true);
+//        add(pLoaging, BorderLayout.CENTER);
+//
+//        pLoaging.setVisible(false);
+//        add(pLoaging);
+
+
+        //***********MENU*********************
         mb = new JMenuBar();
         setJMenuBar(mb);
 
@@ -169,6 +174,7 @@ public class Projecto2D extends JApplet implements ActionListener, ChangeListene
 
         //----------------painel Opções----------------
         pOpcoes = new JPanel();
+        pOpcoes.setLayout(new BoxLayout(pOpcoes, BoxLayout.Y_AXIS));
         pOpcoes.setDoubleBuffered(true);
         pOpcoes.setBackground(Color.YELLOW);
         //titulo no painel
@@ -178,21 +184,22 @@ public class Projecto2D extends JApplet implements ActionListener, ChangeListene
         
         //Numero de peças
         lNPecas = new JLabel("Número de Peças:");
-//        pOpcoes.add(lNPecas);
+        pOpcoes.add(lNPecas);
         sNPecas = new JSpinner(new SpinnerNumberModel(3, 3, 8, 1));
         sNPecas.addChangeListener(this);
         pOpcoes.add(sNPecas);
         
+        
         //velocidade
         lVelocidade = new JLabel("Velocidade:");
-//        pOpcoes.add(lVelocidade);
+        pOpcoes.add(lVelocidade);
         sVelocidade = new JSlider(10, 100, 50);
         sVelocidade.addChangeListener(this);
-//        pOpcoes.add(sVelocidade);
+        pOpcoes.add(sVelocidade);
         
         //tranparencia
         lTransparencia = new JLabel("Transparencia:");
-//        pOpcoes.add(lTransparencia);
+        pOpcoes.add(lTransparencia);
         sTransparencia = new JSlider(0, 100, 40);
         sTransparencia.addChangeListener(this);
         pOpcoes.add(sTransparencia);
@@ -210,7 +217,7 @@ public class Projecto2D extends JApplet implements ActionListener, ChangeListene
     @Override
     public void actionPerformed(ActionEvent ae) {
         String op = ae.getActionCommand();
-        switch(op){
+        switch (op) {
             case "Iniciar":
                 pAJ.iniciarAnimação();
                 bIniciar.setText("Pausa");
@@ -223,7 +230,7 @@ public class Projecto2D extends JApplet implements ActionListener, ChangeListene
             case "Continuar":
                 pAJ.iniciarAnimação();
                 bIniciar.setText("Pausa");
-                break;            
+                break;
             case "Stop":
                 pAJ = new PAreaJogo();
                 bIniciar.setText("Iniciar");
@@ -247,16 +254,16 @@ public class Projecto2D extends JApplet implements ActionListener, ChangeListene
                 break;
             case "Sair":
                 //perguntar ao utilizador se pretende mesmo sair da área do jogo
-                Object[] option = {"Sim","Não"};
-                int res = JOptionPane.showOptionDialog(null, "Tem a certeza que pretende Sair?", "", 
+                Object[] option = {"Sim", "Não"};
+                int res = JOptionPane.showOptionDialog(null, "Tem a certeza que pretende Sair?", "",
                         JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, option, option[0]);
-                if(res == 0){
+                if (res == 0) {
                     System.exit(0);
-                } 
+                }
                 break;
             case "Repor Imagem":
                 opImagem = "Repor Imagem";
-                System.out.println(""+opImagem);
+                System.out.println("" + opImagem);
                 pAJ = new PAreaJogo();
                 break;
             case "Tom Cinzento":
@@ -277,7 +284,7 @@ public class Projecto2D extends JApplet implements ActionListener, ChangeListene
                 break;
             case "Destacar Arestas":
                 opImagem = "Destacar Arestas";
-                System.out.println(""+opImagem);
+                System.out.println("" + opImagem);
                 pAJ = new PAreaJogo();
                 break;
         }
@@ -287,22 +294,23 @@ public class Projecto2D extends JApplet implements ActionListener, ChangeListene
     public void stateChanged(ChangeEvent ce) {
         Object op = ce.getSource();
         nPecas = Integer.parseInt(sNPecas.getValue().toString());
-        
-        if(sNPecas.equals(op)){
+
+        if (sNPecas.equals(op)) {
             pAJ.pausarAnimação();
             bIniciar.setText("Iniciar");
             pAJ = new PAreaJogo();
             add(pAJ, BorderLayout.CENTER);
 //            pAJ.repaint();
             this.setVisible(true);
-        }else if(sVelocidade.equals(op)){
+        } else if (sVelocidade.equals(op)) {
             velocidade = sVelocidade.getValue() / 10;
-        } else if(sTransparencia.equals(op)){
-            transparencia = sTransparencia.getValue() /100.0f;
+        } else if (sTransparencia.equals(op)) {
+            transparencia = sTransparencia.getValue() / 100.0f;
             pAJ.repaint();
             this.setVisible(true);
         }
     }
+
     public void resolucaoCompleta() {
         bIniciar.setText("Iniciar");
         JOptionPane.showMessageDialog(null, "Resolução Completa");
@@ -324,17 +332,18 @@ public class Projecto2D extends JApplet implements ActionListener, ChangeListene
         private boolean movCompleto;
         private int paso;
         private Timer tempo;
-                
+
         public PAreaJogo() {
+            addMouseListener(this);
+            addMouseMotionListener(this);
 //            this.nPecas = nPecas;
 //            this.th = th;
             pecas = new Imagem();
             inicializarAnimação();
             tempo = new Timer(5, this);
         }
-      
-        
-        private void inicializarAnimação(){
+
+        private void inicializarAnimação() {
             n = 0;
             torre = new int[4];
             torre[1] = nPecas;
@@ -354,11 +363,11 @@ public class Projecto2D extends JApplet implements ActionListener, ChangeListene
             movCompleto = false;
             paso = 1;
         }
-        
-        public void paintComponent(Graphics g){
+
+        public void paintComponent(Graphics g) {
             super.paintComponent(g);
             Graphics2D g2 = (Graphics2D) g;
-            
+
             GradientPaint grad;
             BufferedImage image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
             //criar uma imagem para juntar todos os componentes na mesma
@@ -367,8 +376,8 @@ public class Projecto2D extends JApplet implements ActionListener, ChangeListene
             //********************DESENHAR JOGO*************************************
 //            GradientPaint grad = new GradientPaint(100, 50, Color.YELLOW, 400, 500, castanho);
 //            gImage.setPaint(grad);
-            
-            
+
+
             //desemhar base e torres
             Shape base = new torre(25f, 295f, 630f, 40f).criarTorre();
             Area b = new Area(new torre(25f, 295f, 630f, 40f).criarTorre());
@@ -378,24 +387,24 @@ public class Projecto2D extends JApplet implements ActionListener, ChangeListene
             b.add(t1);
             b.add(t2);
             b.add(t3);
-            
+
             URL url = getClass().getClassLoader().getResource("imagens/textura12.jpg");
             try {
                 bi = ImageIO.read(url);
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
-            
+
             Rectangle2D r = new Rectangle2D.Double(0, 0, bi.getWidth(), bi.getHeight());
             //texturepaint
             TexturePaint tp = new TexturePaint(bi, r);
             gImage.setPaint(tp);
             gImage.fill(b);
-            
+
             //desenhar peças
             for (int i = nPecas; i >= 1; i--) {
 
-            try {
+                try {
                     bi = ImageIO.read(getClass().getClassLoader().getResource("pecas/" + i + ".png"));
                     switch (opImagem) {
                         case "Original":
@@ -419,124 +428,125 @@ public class Projecto2D extends JApplet implements ActionListener, ChangeListene
             gImage.drawString("Torre 1", 105, 320);
             gImage.drawString("Torre 2", 305, 320);
             gImage.drawString("Torre 3", 505, 320);
-            
+
             AlphaComposite ac = AlphaComposite.getInstance(AlphaComposite.DST_OVER, transparencia);
             gImage.setComposite(ac);
 
             Toolkit.getDefaultToolkit().sync();
-            
+
             //*******************IMAGEM DE FUNDO********************
             //-------------------DRAW STRING-------------------------
             double radius = 120.0;
-        
-        
-       String text = "Torre Hanoii";
 
-        font = new Font("Serif", Font.BOLD, 38);
-               
-        gImage.setFont(font);
-        AffineTransform transform = new AffineTransform();
 
-        gImage.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            String text = "Torre Hanoii";
 
-        gImage.translate(300, 180);
-        grad = new GradientPaint(0, 30, Color.RED, 30, 30, Color.BLUE);
-        gImage.setPaint(grad);
-        for (int i = 0; i < text.length(); i++) {
-            double angle = i / (double) text.length() * (2 * Math.PI);
-            float x = (float) (Math.cos(angle) * radius);
-            float y = (float) (-Math.sin(angle) * radius);
+            font = new Font("Serif", Font.BOLD, 38);
 
-            gImage.transform(transform);
+            gImage.setFont(font);
+            AffineTransform transform = new AffineTransform();
 
-            transform.setToRotation(-2 * Math.PI / 14);
-            gImage.drawString(text.charAt(i) + "", 0, 100);
-        }
-        
-        //anular a rotação
-        for (int i = 0; i <= text.length(); i++) {
-            double angle = i / (double) text.length() * (2 * Math.PI);
-            float x = (float) (Math.cos(angle) * radius);
-            float y = (float) (-Math.sin(angle) * radius);
+            gImage.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-            gImage.transform(transform);
+            gImage.translate(300, 180);
+            grad = new GradientPaint(0, 30, Color.RED, 30, 30, Color.BLUE);
+            gImage.setPaint(grad);
+            for (int i = 0; i < text.length(); i++) {
+                double angle = i / (double) text.length() * (2 * Math.PI);
+                float x = (float) (Math.cos(angle) * radius);
+                float y = (float) (-Math.sin(angle) * radius);
 
-            transform.setToRotation(2 * Math.PI / 14);
-        }
-        //anular o translate
-        gImage.translate(-300, -180);
-            
+                gImage.transform(transform);
+
+                transform.setToRotation(-2 * Math.PI / 14);
+                gImage.drawString(text.charAt(i) + "", 0, 100);
+            }
+
+            //anular a rotação
+            for (int i = 0; i <= text.length(); i++) {
+                double angle = i / (double) text.length() * (2 * Math.PI);
+                float x = (float) (Math.cos(angle) * radius);
+                float y = (float) (-Math.sin(angle) * radius);
+
+                gImage.transform(transform);
+
+                transform.setToRotation(2 * Math.PI / 14);
+            }
+            //anular o translate
+            gImage.translate(-300, -180);
+
             //-------------------CLIPPING---------------------------
             Polygon poly = new Polygon();
-        
-            for (int i = 0; i < 8; i++) {
-                poly.addPoint((int)(300 + 130 * Math.cos(i * 2*Math.PI / 8) ),(int) (170 + 130 * Math.sin(i*2*Math.PI/8) ));
-            }
-         //Efeito clipping   
-         GeneralPath path = new GeneralPath();
-        
-        Area oct = new Area(poly);
-        
-        g2.translate(10, 10);
-        path.moveTo(10, 10);
-        path.quadTo(310, 30, 610, 10);
-        path.quadTo(580, 168, 610, 340);
-        path.quadTo(310, 305, 10, 340);
-        path.quadTo(30, 168, 10, 10);
-        path.closePath();
-        Area gp = new Area(path);
-        gp.subtract(oct);
-        //gradiante 
-        grad = new GradientPaint(200, 100, Color.CYAN, 400, 500, Color.MAGENTA);
-        gImage.setPaint(grad);
-        
-        //g2.setColor(Color.LIGHT_GRAY); 
-        gImage.fill(gp);
-        gImage.clip(gp);
-        gImage.setColor(Color.BLACK);
-        font = new Font("Serif", Font.BOLD, 100);
-        String text1 = "Jorge";
-        String text2 = "Antunes";
 
-        AffineTransform tr = new AffineTransform();
-        tr.rotate(-Math.PI / 4);
-        Font theDerivedFont = font.deriveFont(tr);
-        gImage.setFont(theDerivedFont);
-        
-        FontRenderContext frg = g2.getFontRenderContext();
-        GlyphVector gv1 = font.createGlyphVector(frg, text1);
-        GlyphVector gv2 = font.createGlyphVector(frg, text2);
-        Shape glyph = gv1.getOutline(-150,250);       
-        
-        Shape transformedGlyph = tr.createTransformedShape(glyph);
-        gImage.setClip(transformedGlyph);
-        gImage.clip(gp);
-        gImage.setColor(Color.red);
-        for (int i = 0; i < 2000; i++) {      
-            Shape shape = new Ellipse2D.Double(Math.random()*500, Math.random()*400, 30, 20);
-            
-            gImage.draw(shape);
-    }
-        
-        glyph = gv2.getOutline(0,450);
-        transformedGlyph = tr.createTransformedShape(glyph);
-        gImage.setClip(transformedGlyph);
-        gImage.clip(gp);
-        gImage.setColor(Color.BLUE);
-        for (int i = 0; i < 2000; i++) {      
-            Shape shape = new Ellipse2D.Double(Math.random()*500, Math.random()*400, 30, 20);
-            gImage.draw(shape);
-    }
-            
-            
+            for (int i = 0; i < 8; i++) {
+                poly.addPoint((int) (300 + 130 * Math.cos(i * 2 * Math.PI / 8)), (int) (170 + 130 * Math.sin(i * 2 * Math.PI / 8)));
+            }
+            //Efeito clipping   
+            GeneralPath path = new GeneralPath();
+
+            Area oct = new Area(poly);
+
+            g2.translate(10, 10);
+            path.moveTo(10, 10);
+            path.quadTo(310, 30, 610, 10);
+            path.quadTo(580, 168, 610, 340);
+            path.quadTo(310, 305, 10, 340);
+            path.quadTo(30, 168, 10, 10);
+            path.closePath();
+            Area gp = new Area(path);
+            gp.subtract(oct);
+            //gradiante 
+            grad = new GradientPaint(200, 100, Color.CYAN, 400, 500, Color.MAGENTA, true);
+            gImage.setPaint(grad);
+
+            //g2.setColor(Color.LIGHT_GRAY); 
+            gImage.fill(gp);
+            gImage.clip(gp);
+            gImage.setColor(Color.BLACK);
+            font = new Font("Serif", Font.BOLD, 100);
+            String text1 = "Jorge";
+            String text2 = "Antunes";
+
+            AffineTransform tr = new AffineTransform();
+            tr.rotate(-Math.PI / 4);
+            Font theDerivedFont = font.deriveFont(tr);
+            gImage.setFont(theDerivedFont);
+
+            FontRenderContext frg = g2.getFontRenderContext();
+            GlyphVector gv1 = font.createGlyphVector(frg, text1);
+            GlyphVector gv2 = font.createGlyphVector(frg, text2);
+            Shape glyph = gv1.getOutline(-150, 250);
+
+            Shape transformedGlyph = tr.createTransformedShape(glyph);
+            gImage.setClip(transformedGlyph);
+            gImage.clip(gp);
+            gImage.setColor(Color.red);
+            for (int i = 0; i < 2000; i++) {
+                Shape shape = new Ellipse2D.Double(Math.random() * 500, Math.random() * 400, 30, 20);
+
+                gImage.draw(shape);
+            }
+
+            glyph = gv2.getOutline(0, 450);
+            transformedGlyph = tr.createTransformedShape(glyph);
+            gImage.setClip(transformedGlyph);
+            gImage.clip(gp);
+            gImage.setColor(Color.BLUE);
+            for (int i = 0; i < 2000; i++) {
+                Shape shape = new Ellipse2D.Double(Math.random() * 500, Math.random() * 400, 30, 20);
+                gImage.draw(shape);
+            }
+
+
 
             //Desenhar imagem 
             g2.drawImage(image, null, 0, 0);
             g.dispose();
-            
+
         }
 
         public void algoritmoHanoi(int m, int origen, int temporal, int destino) {
+//            System.out.println("m: "+m+" origen: "+ origen+" temporal: "+temporal+" destino: "+ destino);
             if (m == 0) {
                 return;
             }
@@ -547,165 +557,177 @@ public class Projecto2D extends JApplet implements ActionListener, ChangeListene
         }
 
         public int posicaoXPeca(int ficha, int torre) {
-        int k = (torre - 1) * 200;
-        switch (ficha) {
-            case 1:
-                return 110 + k;
-            case 2:
-                return 100 + k;
-            case 3:
-                return 90 + k;
-            case 4:
-                return 80 + k;
-            case 5:
-                return 70 + k;
-            case 6:
-                return 60 + k;
-            case 7:
-                return 50 + k;
-            case 8:
-                return 40 + k;
+            int k = (torre - 1) * 200 ;
+            switch (ficha) {
+                case 1:
+                    if(torre == 3){
+                        return 110 + k;
+                    }else{
+                        return 110 + k + velocidade;
+                    }                    
+                case 2:
+                    return 100 + k;
+                case 3:
+                    return 90 + k;
+                case 4:
+                    return 80 + k;
+                case 5:
+                    return 70 + k;
+                case 6:
+                    return 60 + k;
+                case 7:
+                    return 50 + k;
+                case 8:
+                    return 40 + k;
+            }
+            return 0;
         }
-        return 0;
-    }
 
-    public int posicaoYPeca(int nivel) {
-        switch (nivel) {
-            case 1:
-                return 260;
-            case 2:
-                return 233;
-            case 3:
-                return 206;
-            case 4:
-                return 179;
-            case 5:
-                return 152;
-            case 6:
-                return 125;
-            case 7:
-                return 98;
-            case 8:
-                return 71;
+        public int posicaoYPeca(int nivel) {
+            switch (nivel) {
+                case 1:
+                    return 260;
+                case 2:
+                    return 233;
+                case 3:
+                    return 206;
+                case 4:
+                    return 179;
+                case 5:
+                    return 152;
+                case 6:
+                    return 125;
+                case 7:
+                    return 98;
+                case 8:
+                    return 71;
+            }
+            return 0;
         }
-        return 0;
-    }
-        public void iniciarAnimação(){
+
+        public void iniciarAnimação() {
             //animação
             tempo.restart();
             //music
-            
+
         }
-        
-        public void pausarAnimação(){
+
+        public void pausarAnimação() {
             //animação
             tempo.stop();
             //music
-            
+
         }
 
         @Override
         public void actionPerformed(ActionEvent ae) {
+//            System.out.println("peca: "+peca);
+//            System.out.println("mov: "+movimentos[movActual].getTorreDestino());
             switch (paso) {
-            case 1: //mover a peça para cima
-                if (y > 30) { //30 é o maximo que a peça pode subir
-                    y-=velocidade;
-                    posicao[peca].setY(y);
+                case 1: //mover a peça para cima
+                    if (y > 30) { //30 é o maximo que a peça pode subir
+                        y -= velocidade;
+                        posicao[peca].setY(y);
 
-                } else {
-                    if (movimentos[movActual].getTorreOrigen() < movimentos[movActual].getTorreDestino()) {
-                        paso = 2;
                     } else {
-                        paso = 3;
+                        if (movimentos[movActual].getTorreOrigen() < movimentos[movActual].getTorreDestino()) {
+                            paso = 2;
+                        } else {
+                            paso = 3;
+                        }
                     }
-                }
-                break;
-            case 2: //mover para a direita
-                if (x < posicaoXPeca(peca, movimentos[movActual].getTorreDestino())) {
-                    x+=velocidade;
-                    posicao[peca].setX(x);
-                } else {
-                    paso = 4;
-                }
-                break;
-            case 3: // mover para a esquerda
-                if (x > posicaoXPeca(peca, movimentos[movActual].getTorreDestino())) {
-                    x-=velocidade;
-                    posicao[peca].setX(x);
-                } else {
-                    paso = 4;
-                }
-                break;
-            case 4: //mover para baixo
-                int nivel = torre[movimentos[movActual].getTorreDestino()] + 1;
-                if (y < posicaoYPeca(nivel)) {
-                    y+=velocidade;
-                    posicao[peca].setY(y);
-                } else {
-                    movCompleto = true;
-                }
-                break;
-        }
-        if (movCompleto) {
-            paso = 1;
-            torre[movimentos[movActual].getTorreDestino()]++;
-            torre[movimentos[movActual].getTorreOrigen()]--;
-            movActual++;
-            if (movActual == (int) Math.pow(2, nPecas)) {
-                tempo.stop();
-                resolucaoCompleta();
-            } else {
-                movCompleto = false;
-                peca = movimentos[movActual].getPeca();
-                x = posicao[peca].getX();
-                y = posicao[peca].getY();
+                    break;
+                case 2: //mover para a direita
+                    if (x < posicaoXPeca(peca, movimentos[movActual].getTorreDestino())) {
+                        x += velocidade;
+                        posicao[peca].setX(x);
+                    } else {
+                        paso = 4;
+                    }
+                    break;
+                case 3: // mover para a esquerda
+                    if (x > posicaoXPeca(peca, movimentos[movActual].getTorreDestino())) {
+                        x -= velocidade;
+                        posicao[peca].setX(x);
+                    } else {
+                        paso = 4;
+                    }
+                    break;
+                case 4: //mover para baixo
+                    int nivel = torre[movimentos[movActual].getTorreDestino()] + 1;
+                    if (y < posicaoYPeca(nivel)) {
+                        y += velocidade;
+                        posicao[peca].setY(y);
+                    } else {
+                        movCompleto = true;
+                    }
+                    break;
             }
-        }
-        repaint();
+            if (movCompleto) {
+                paso = 1;
+                torre[movimentos[movActual].getTorreDestino()]++;
+                torre[movimentos[movActual].getTorreOrigen()]--;
+                movActual++;
+                if (movActual == (int) Math.pow(2, nPecas)) {
+                    tempo.stop();
+                    resolucaoCompleta();
+                } else {
+                    movCompleto = false;
+                    peca = movimentos[movActual].getPeca();
+                    x = posicao[peca].getX();
+                    y = posicao[peca].getY();
+                }
+            }
+            repaint();
         }
 
         @Override
         public void mouseClicked(MouseEvent me) {
+//            posicao[peca].setX(me.getX());
+//            posicao[peca].setY(me.getY());
+//            this.repaint();
+//            System.out.println("torre1: "+torre[1]);
+//            System.out.println("torre2: "+torre[2]);
+//            System.out.println("torre3: "+torre[3]);
             
         }
 
         @Override
-        public void mousePressed(MouseEvent me) {
+        public void mousePressed(MouseEvent me) {      
             
         }
 
         @Override
         public void mouseReleased(MouseEvent me) {
-            
         }
 
         @Override
         public void mouseEntered(MouseEvent me) {
-            
         }
 
         @Override
         public void mouseExited(MouseEvent me) {
-            
         }
 
         @Override
         public void mouseDragged(MouseEvent me) {
-            
+            posicao[peca].setX(me.getX());
+            posicao[peca].setY(me.getY());
+            this.repaint();
         }
 
         @Override
         public void mouseMoved(MouseEvent me) {
-            
+
         }
 
         @Override
         public void run() {
-            while(true){
-                repaint();
+            while (true) {
+                this.repaint();
             }
         }
-        
+
         @Override
         public int print(Graphics g, PageFormat pf, int i) throws PrinterException {
             switch (i) {
@@ -720,12 +742,11 @@ public class Projecto2D extends JApplet implements ActionListener, ChangeListene
         }
 
         private int iterCount(float cr, float ci) {
-            
+
             return 0;
         }
-        
     }
-    
+
     //*****EFEITOS DAS IMAGENS**************
     public static BufferedImage arestar(BufferedImage arestar) {
         AffineTransformOp op = null;
@@ -739,6 +760,7 @@ public class Projecto2D extends JApplet implements ActionListener, ChangeListene
         }
         return (new ConvolveOp(new Kernel(9, 1, data))).filter(arestar, null);
     }
+
     public BufferedImage Contraste(BufferedImage bi) {
         BufferedImage temp = new BufferedImage(bi.getWidth(), bi.getHeight(), BufferedImage.TYPE_INT_BGR);
         int a = 0;
@@ -788,67 +810,71 @@ public class Projecto2D extends JApplet implements ActionListener, ChangeListene
         }
         return temp;
     }
-    
+
     //painel do loading
-class PLoading extends JPanel implements Runnable{
-    int load=0;
-    int alpha = 0;
-    boolean loading = true;
-    public PLoading() {
-        setPreferredSize(new Dimension(200, 200));
-        setBackground(new Color(9, 182, 64));
-        Thread thread = new Thread(this);
-        thread.start();
-    }
+    class PLoading extends JPanel implements Runnable {
 
-    public void run() {
-        
-        while (true) {
-            load += 1;
-            if (load <= 100) {
-                repaint();
-                try {
-                    Thread.sleep(150);
-                } catch (InterruptedException ex) {
-                }
-            } else{
-                loading = false;
-                return;
-            }
-        }  
-    }
+        int alpha = 0;
+        boolean loading = true;
 
-    public void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        Graphics2D g2 = (Graphics2D) g;
-        Font font = new Font("Serif", Font.BOLD, 30);
-        g2.setFont(font);
-        g2.translate(500, 195);
-        AffineTransform at = new AffineTransform();
-        for (int i = 0; i < 8; i++) {
-            
-            Shape shape = new Ellipse2D.Double(42, 42, 105, 105);
-            if (alpha < 254) {
-                alpha += (int)(255/8);
-                if(alpha>255)alpha=255;
-            } else {
-                alpha = 15;
-            }
-            at.rotate(Math.PI / 4);
-            shape = at.createTransformedShape(shape);
-            g2.setColor(new Color(185, 192, 195, alpha));
-            g2.fill(shape);
+        public PLoading() {
+            setPreferredSize(new Dimension(200, 200));
+            setBackground(new Color(9, 182, 64));
+            Thread thread = new Thread(this);
+            thread.start();
         }
-        g2.drawString("LOADING...", -80, 0);
-        g2.drawString(""+load+"%", -20, 30);
 
+        public void run() {
+
+            while (true) {
+                load += 1;
+                if (load <= 100) {
+                    repaint();
+                    try {
+                        Thread.sleep(150);
+                    } catch (InterruptedException ex) {
+                    }
+                } else {
+                    loading = false;
+                    return;
+                }
+            }
+        }
+
+        public void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D g2 = (Graphics2D) g;
+            Font font = new Font("Serif", Font.BOLD, 30);
+            g2.setFont(font);
+            g2.translate(500, 195);
+            AffineTransform at = new AffineTransform();
+            for (int i = 0; i < 8; i++) {
+
+                Shape shape = new Ellipse2D.Double(42, 42, 105, 105);
+                if (alpha < 254) {
+                    alpha += (int) (255 / 8);
+                    if (alpha > 255) {
+                        alpha = 255;
+                    }
+                } else {
+                    alpha = 15;
+                }
+                at.rotate(Math.PI / 4);
+                shape = at.createTransformedShape(shape);
+                g2.setColor(new Color(185, 192, 195, alpha));
+                g2.fill(shape);
+            }
+            g2.drawString("LOADING...", -80, 0);
+            g2.drawString("" + load + "%", -20, 30);
+
+        }
     }
 }
-}
+
 class Imagem extends JPanel {
 
     private BufferedImage image = null;
-    private int x,y;
+    private int x, y;
     private Posicao[] posicao;
 
     public Imagem() {
@@ -857,7 +883,6 @@ class Imagem extends JPanel {
         setBackground(Color.white);
         posicao = new Posicao[9];
     }
-    
 
     public Image setImage(BufferedImage bi) {
         this.image = bi;
