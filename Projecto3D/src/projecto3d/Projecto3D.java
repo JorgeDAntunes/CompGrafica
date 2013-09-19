@@ -9,6 +9,7 @@ import com.sun.j3d.utils.behaviors.mouse.MouseRotate;
 import com.sun.j3d.utils.behaviors.mouse.MouseTranslate;
 import com.sun.j3d.utils.behaviors.mouse.MouseZoom;
 import com.sun.j3d.utils.geometry.Box;
+import com.sun.j3d.utils.geometry.Primitive;
 import com.sun.j3d.utils.geometry.Sphere;
 import com.sun.j3d.utils.universe.SimpleUniverse;
 import com.sun.org.apache.bcel.internal.classfile.Code;
@@ -19,6 +20,7 @@ import java.awt.GraphicsConfiguration;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.util.Enumeration;
 import javax.media.j3d.*;
 import javax.media.j3d.AmbientLight;
 import javax.media.j3d.Appearance;
@@ -36,6 +38,7 @@ import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Color3f;
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
+import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
 
 /**
@@ -209,10 +212,12 @@ public class Projecto3D extends Applet implements MouseListener, MouseMotionList
         PositionInterpolator posInt = new PositionInterpolator(alph, tgAnim, trAnim, 0f, 6.1f);
         posInt.setSchedulingBounds(bounds);
         
-        
+        DetectorColisao dc = new DetectorColisao(tgBola, bounds);
 
+        
         tgAnim.addChild(posInt);
         tgAnim.addChild(tgBola);
+        tgAnim.addChild(dc);
         tg.addChild(tgAnim);
         
         
@@ -274,5 +279,72 @@ public class Projecto3D extends Applet implements MouseListener, MouseMotionList
     @Override
     public void mouseMoved(MouseEvent me) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+}
+
+class DetectorColisao extends Behavior{
+    private static final Color3f ccolisao = new Color3f(0.0f, 1.0f, 0.0f); // cor da deteção da colisão
+    
+    private Appearance ap;
+    private static final ColoringAttributes ca = new ColoringAttributes(ccolisao, ColoringAttributes.SHADE_GOURAUD);//sombriamento suave
+    
+    private WakeupCriterion[] wc; //especifica deferentes critérios de activação
+    
+    private WakeupOr wo; //especifica que Java 3D deve despertar este comportamento quando qualquer um dos critérios de despertar constituintes do WakeupCondition torna-se válido
+    
+    private TransformGroup colisaoTg;
+    
+    Vector3d v = new Vector3d();
+    
+    public DetectorColisao(TransformGroup tg, Bounds b){
+        colisaoTg = tg;
+        setSchedulingBounds(b);
+    }
+    
+
+//    @Override
+    public void initialize() {
+        wc = new WakeupCriterion[3];
+        wc[0] = new WakeupOnCollisionEntry(colisaoTg, WakeupOnCollisionEntry.USE_GEOMETRY);
+        wc[1] = new WakeupOnCollisionExit(colisaoTg, WakeupOnCollisionEntry.USE_GEOMETRY);
+        wc[2] = new WakeupOnCollisionMovement(colisaoTg, WakeupOnCollisionEntry.USE_GEOMETRY);
+        wo = new WakeupOr(wc);
+        wakeupOn(wo);
+    }
+
+    @Override
+    public void processStimulus(Enumeration en) {
+        WakeupCriterion wakCri = (WakeupCriterion) en.nextElement();
+        Node n;
+        if(wakCri instanceof WakeupOnCollisionEntry){
+            n = ((WakeupOnCollisionEntry) wakCri).getTriggeringPath().getObject().getParent();
+            System.out.println("Colisão com: "+n.getUserData());
+            
+            ap = ((Primitive) n).getAppearance();
+            ap.getColoringAttributes();
+            ap.setColoringAttributes(ca);
+            
+        }else if(wakCri instanceof WakeupOnCollisionExit){
+            n = ((WakeupOnCollisionExit) wakCri).getTriggeringPath().getObject().getParent();
+            System.out.println("Colisão parou com: "+n.getUserData());
+            
+            //laranja
+            Appearance apLaranja = new Appearance();
+            apLaranja.setCapability(Appearance.ALLOW_COLORING_ATTRIBUTES_WRITE);
+            Color3f cLaranja = new Color3f(0.988f, 0.800f, 0.080f);
+            ColoringAttributes caLaranja = new ColoringAttributes(cLaranja, ColoringAttributes.SHADE_GOURAUD);
+            caLaranja.setColor(cLaranja);
+            
+            ap.setColoringAttributes(caLaranja);
+        }else {
+            n = ((WakeupOnCollisionMovement) wakCri).getTriggeringPath().getObject().getParent();
+            System.out.println("Movimento depois da colição: "+n.getUserData());
+            
+            ap = ((Primitive) n).getAppearance();
+            ap.getColoringAttributes();
+            ap.setColoringAttributes(ca);
+    
+        }
+        wakeupOn(wo);
     }
 }
