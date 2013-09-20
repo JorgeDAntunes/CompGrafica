@@ -8,6 +8,7 @@ import com.sun.j3d.utils.applet.MainFrame;
 import com.sun.j3d.utils.behaviors.mouse.MouseRotate;
 import com.sun.j3d.utils.behaviors.mouse.MouseTranslate;
 import com.sun.j3d.utils.behaviors.mouse.MouseZoom;
+import com.sun.j3d.utils.behaviors.vp.OrbitBehavior;
 import com.sun.j3d.utils.geometry.Box;
 import com.sun.j3d.utils.geometry.Primitive;
 import com.sun.j3d.utils.geometry.Sphere;
@@ -47,6 +48,7 @@ import javax.vecmath.Vector3f;
  */
 public class Projecto3D extends Applet implements MouseListener, MouseMotionListener{
 
+    private float x = -1.0f;
     /**
      * @param args the command line arguments
      */
@@ -65,6 +67,11 @@ public class Projecto3D extends Applet implements MouseListener, MouseMotionList
         
         SimpleUniverse su = new SimpleUniverse(cv);
         su.getViewingPlatform().setNominalViewingTransform();
+        
+//        OrbitBehavior orbit = new OrbitBehavior(cv);
+//        orbit.setSchedulingBounds(new BoundingSphere());
+//        su.getViewingPlatform().setViewPlatformBehavior(orbit);
+        
         su.addBranchGraph(bg);
         
         
@@ -205,19 +212,19 @@ public class Projecto3D extends Applet implements MouseListener, MouseMotionList
         TransformGroup tgAnim = new TransformGroup();
         tgAnim.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
         Transform3D trAnim = new Transform3D();
-        trAnim.setRotation(new AxisAngle4d(0.0, 0.0, 1.0, Math.PI/2));
+        trAnim.setRotation(new AxisAngle4d(0.0, 0.0, x, Math.PI/2));
         
-        Alpha alph = new Alpha(-1, 10000);
+        Alpha alph = new Alpha(-1, 2000);
         alph.setStartTime(System.currentTimeMillis());
-        PositionInterpolator posInt = new PositionInterpolator(alph, tgAnim, trAnim, 0f, 6.1f);
+        PositionInterpolator posInt = new PositionInterpolator(alph, tgAnim, trAnim, 0f, 1.1f);
         posInt.setSchedulingBounds(bounds);
         
         DetectorColisao dc = new DetectorColisao(tgBola, bounds);
 
         
         tgAnim.addChild(posInt);
-        tgAnim.addChild(tgBola);
         tgAnim.addChild(dc);
+        tgAnim.addChild(tgBola);   
         tg.addChild(tgAnim);
         
         
@@ -280,13 +287,13 @@ public class Projecto3D extends Applet implements MouseListener, MouseMotionList
     public void mouseMoved(MouseEvent me) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-}
-
-class DetectorColisao extends Behavior{
-    private static final Color3f ccolisao = new Color3f(0.0f, 1.0f, 0.0f); // cor da deteção da colisão
     
-    private Appearance ap;
-    private static final ColoringAttributes ca = new ColoringAttributes(ccolisao, ColoringAttributes.SHADE_GOURAUD);//sombriamento suave
+    class DetectorColisao extends Behavior{
+    
+    private final Color3f ccolisao = new Color3f(0.0f, 1.0f, 0.0f); // cor da deteção da colisão
+    
+    private Appearance app;
+    private final ColoringAttributes ca = new ColoringAttributes(ccolisao, ColoringAttributes.SHADE_GOURAUD);//sombriamento suave
     
     private WakeupCriterion[] wc; //especifica deferentes critérios de activação
     
@@ -317,34 +324,43 @@ class DetectorColisao extends Behavior{
         WakeupCriterion wakCri = (WakeupCriterion) en.nextElement();
         Node n;
         if(wakCri instanceof WakeupOnCollisionEntry){
-            n = ((WakeupOnCollisionEntry) wakCri).getTriggeringPath().getObject().getParent();
-            System.out.println("Colisão com: "+n.getUserData());
-            
-            ap = ((Primitive) n).getAppearance();
-            ap.getColoringAttributes();
-            ap.setColoringAttributes(ca);
-            
+//           n = ((WakeupOnCollisionEntry) wakCri).getTriggeringPath().getObject().getParent();
+//            System.out.println("Colisão com: "+n.getUserData());
+//            
+//            app = ((Primitive) n).getAppearance();
+//            app.getColoringAttributes();
+//            app.setColoringAttributes(ca);
+//            System.out.println("1");
+//            
         }else if(wakCri instanceof WakeupOnCollisionExit){
-            n = ((WakeupOnCollisionExit) wakCri).getTriggeringPath().getObject().getParent();
-            System.out.println("Colisão parou com: "+n.getUserData());
-            
-            //laranja
-            Appearance apLaranja = new Appearance();
-            apLaranja.setCapability(Appearance.ALLOW_COLORING_ATTRIBUTES_WRITE);
-            Color3f cLaranja = new Color3f(0.988f, 0.800f, 0.080f);
-            ColoringAttributes caLaranja = new ColoringAttributes(cLaranja, ColoringAttributes.SHADE_GOURAUD);
-            caLaranja.setColor(cLaranja);
-            
-            ap.setColoringAttributes(caLaranja);
+//          n = ((WakeupOnCollisionExit) wakCri).getTriggeringPath().getObject().getParent();
+//            System.out.println("Colisão parou com: "+n.getUserData());
+//            
+////            laranja
+//            Appearance apLaranja = new Appearance();
+//            apLaranja.setCapability(Appearance.ALLOW_COLORING_ATTRIBUTES_WRITE);
+//            Color3f cLaranja = new Color3f(0.988f, 0.800f, 0.080f);
+//            ColoringAttributes caLaranja = new ColoringAttributes(cLaranja, ColoringAttributes.SHADE_GOURAUD);
+//            caLaranja.setColor(cLaranja);
+//            
+//            app.setColoringAttributes(caLaranja);
+//            System.out.println("2");
+        x = 0.0f;
         }else {
-            n = ((WakeupOnCollisionMovement) wakCri).getTriggeringPath().getObject().getParent();
-            System.out.println("Movimento depois da colição: "+n.getUserData());
-            
-            ap = ((Primitive) n).getAppearance();
-            ap.getColoringAttributes();
-            ap.setColoringAttributes(ca);
-    
+//           n = ((WakeupOnCollisionMovement) wakCri).getTriggeringPath().getObject().getParent();
+//            System.out.println("Movimento depois da colição: "+n.getUserData());
+//            
+//            app = ((Primitive) n).getAppearance();
+//            app.getColoringAttributes();
+//            app.setColoringAttributes(ca);
+//              System.out.println("3");
         }
         wakeupOn(wo);
+        
     }
 }
+    
+    
+    
+}
+
