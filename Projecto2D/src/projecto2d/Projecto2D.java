@@ -9,9 +9,13 @@ import java.awt.event.*;
 import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Arc2D;
 import java.awt.geom.Area;
+import java.awt.geom.CubicCurve2D;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Line2D;
+import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
@@ -40,7 +44,7 @@ import javax.swing.border.TitledBorder;
  *
  * @author Jorge
  */
-public class Projecto2D extends JApplet implements ActionListener, ChangeListener {
+public class Projecto2D extends JFrame implements ActionListener, ChangeListener {
 
     //GUI Swing/AWT
     private Container con;
@@ -77,22 +81,35 @@ public class Projecto2D extends JApplet implements ActionListener, ChangeListene
     private int velocidade = 1;
 
     public static void main(String[] args) {
-        JFrame frame = new JFrame();
-        frame.setTitle("Torre de Hanoi");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//        JFrame frame = new JFrame();
+//        frame.setTitle("Torre de Hanoi");
+//        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         Projecto2D applet = new Projecto2D();
         applet.init();
-        frame.getContentPane().add(applet);
-        frame.pack();
-//        frame.setSize(800, 450);//Correto
-        frame.setSize(1000, 450);
-        frame.setVisible(true);
-        frame.setLayout(new BorderLayout());
-        frame.setLocationRelativeTo(null); //applet aparecer no centro do ecrã
-        frame.setResizable(false);
+//        frame.getContentPane().add(applet);
+//        frame.pack();
+////        frame.setSize(800, 450);//Correto
+//        frame.setSize(1000, 450);
+//        frame.setVisible(true);
+//        frame.setLayout(new BorderLayout());
+//        frame.setLocationRelativeTo(null); //applet aparecer no centro do ecrã
+//        frame.setResizable(false);
+              
+        
     }
 
+    private void configurarJanela(){
+        this.setSize(900, 450);
+        this.setVisible(true);
+        this.setLayout(new BorderLayout());
+        this.setLocationRelativeTo(null);
+        this.setResizable(false);
+        this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+    }
+    
     public void init() {
+        configurarJanela();
+        
         //******Painel Loading********
 //        pLoaging = new PLoading();
 //        pLoaging.setVisible(true);
@@ -142,6 +159,10 @@ public class Projecto2D extends JApplet implements ActionListener, ChangeListene
         mi = new JMenuItem("Destacar Arestas");
         mi.addActionListener(this);
         menu.add(mi);
+        
+        mi = new JMenuItem("Espelho");
+        mi.addActionListener(this);
+        menu.add(mi);
 
         mb.add(menu);
 
@@ -156,7 +177,7 @@ public class Projecto2D extends JApplet implements ActionListener, ChangeListene
         //-----------painel Botões-----------------
         pBotoes = new JPanel();
         pBotoes.setDoubleBuffered(true);
-        pBotoes.setBackground(Color.red);
+//        pBotoes.setBackground(Color.red);
         //titulo no painel
         TitledBorder title;
         title = BorderFactory.createTitledBorder("Botões");
@@ -176,7 +197,7 @@ public class Projecto2D extends JApplet implements ActionListener, ChangeListene
         pOpcoes = new JPanel();
         pOpcoes.setLayout(new BoxLayout(pOpcoes, BoxLayout.Y_AXIS));
         pOpcoes.setDoubleBuffered(true);
-        pOpcoes.setBackground(Color.YELLOW);
+//        pOpcoes.setBackground(Color.YELLOW);
         //titulo no painel
         title = BorderFactory.createTitledBorder("Opções");
         title.setTitleJustification(TitledBorder.RIGHT);
@@ -263,28 +284,30 @@ public class Projecto2D extends JApplet implements ActionListener, ChangeListene
                 break;
             case "Repor Imagem":
                 opImagem = "Repor Imagem";
-                System.out.println("" + opImagem);
                 pAJ = new PAreaJogo();
                 break;
             case "Tom Cinzento":
-
+                opImagem = "Tom Cinzento";
+                pAJ = new PAreaJogo();
                 break;
             case "Aumentar contraste":
-//                pecas = new Image[LIMITE_FICHAS + 1];
-//                for (int i = 1; i <= LIMITE_FICHAS; i++) {
-//                    ImageIcon ii = Contraste(pecas[i].getImage());
-//                    pecas[i] = ii.getImage();
-//                }
+                opImagem = "Aumentar contraste";
+                pAJ = new PAreaJogo();
                 break;
             case "Suavizar":
-
+                opImagem = "Suavizar";
+                pAJ = new PAreaJogo();
                 break;
             case "Realçar":
-
+                opImagem = "Realçar";
+                pAJ = new PAreaJogo();
                 break;
             case "Destacar Arestas":
                 opImagem = "Destacar Arestas";
-                System.out.println("" + opImagem);
+                pAJ = new PAreaJogo();
+                break;
+            case "Espelho":
+                opImagem = "Espelho";
                 pAJ = new PAreaJogo();
                 break;
         }
@@ -373,6 +396,7 @@ public class Projecto2D extends JApplet implements ActionListener, ChangeListene
             //criar uma imagem para juntar todos os componentes na mesma
             Graphics2D gImage = image.createGraphics();
             Color castanho = new Color(0xA67D3D);
+            
             //********************DESENHAR JOGO*************************************
 //            GradientPaint grad = new GradientPaint(100, 50, Color.YELLOW, 400, 500, castanho);
 //            gImage.setPaint(grad);
@@ -416,6 +440,21 @@ public class Projecto2D extends JApplet implements ActionListener, ChangeListene
                         case "Destacar Arestas":
                             gImage.drawImage(pecas.setImage(arestar(bi)), posicao[i].getX(), posicao[i].getY(), this);
                             break;
+                        case "Suavizar":
+                            gImage.drawImage(pecas.setImage(suavizar(bi)), posicao[i].getX(), posicao[i].getY(), this);
+                            break;
+                        case "Realçar":
+                            gImage.drawImage(pecas.setImage(realcar(bi)), posicao[i].getX(), posicao[i].getY(), this);
+                            break;
+                        case "Tom Cinzento":
+                            gImage.drawImage(pecas.setImage(RGB2GRAY(bi)), posicao[i].getX(), posicao[i].getY(), this);
+                            break;
+                        case "Aumentar contraste":
+                            gImage.drawImage(pecas.setImage(Contraste(bi)), posicao[i].getX(), posicao[i].getY(), this);
+                            break;
+                        case "Espelho":
+                            gImage.drawImage(pecas.setImage(espelho(bi)), posicao[i].getX(), posicao[i].getY(), this);
+                            break;
                     }
 
                 } catch (IOException ex) {
@@ -435,6 +474,7 @@ public class Projecto2D extends JApplet implements ActionListener, ChangeListene
             Toolkit.getDefaultToolkit().sync();
 
             //*******************IMAGEM DE FUNDO********************
+            gImage.translate(30, 0);
             //-------------------DRAW STRING-------------------------
             double radius = 120.0;
 
@@ -521,19 +561,23 @@ public class Projecto2D extends JApplet implements ActionListener, ChangeListene
             gImage.setClip(transformedGlyph);
             gImage.clip(gp);
             gImage.setColor(Color.red);
+            
+            
             for (int i = 0; i < 2000; i++) {
-                Shape shape = new Ellipse2D.Double(Math.random() * 500, Math.random() * 400, 30, 20);
+//                Shape shape = new Ellipse2D.Double(Math.random() * 500, Math.random() * 400, 30, 20);
+                Shape shape = new Line2D.Double(Math.random() * 300, Math.random() * 300, 30, 20);
 
                 gImage.draw(shape);
             }
-
+          
             glyph = gv2.getOutline(0, 450);
             transformedGlyph = tr.createTransformedShape(glyph);
             gImage.setClip(transformedGlyph);
             gImage.clip(gp);
             gImage.setColor(Color.BLUE);
             for (int i = 0; i < 2000; i++) {
-                Shape shape = new Ellipse2D.Double(Math.random() * 500, Math.random() * 400, 30, 20);
+//                Shape shape = new Ellipse2D.Double(Math.random() * 500, Math.random() * 400, 30, 20);
+                Shape shape = new Line2D.Double(Math.random() * 700, Math.random() * 400, 30, 20);
                 gImage.draw(shape);
             }
 
@@ -745,10 +789,11 @@ public class Projecto2D extends JApplet implements ActionListener, ChangeListene
 
             return 0;
         }
-    }
-
-    //*****EFEITOS DAS IMAGENS**************
-    public static BufferedImage arestar(BufferedImage arestar) {
+        
+        
+        
+        //*****EFEITOS DAS IMAGENS**************
+    public BufferedImage arestar(BufferedImage arestar) {
         AffineTransformOp op = null;
         BufferedImageOp bio = null;
         float[] data = {0.0f, -1.0f, 0.0f, -1.0f, 4.0f, -1.0f, 0.0f, -1.0f, 0.0f};
@@ -811,6 +856,72 @@ public class Projecto2D extends JApplet implements ActionListener, ChangeListene
         return temp;
     }
 
+    public BufferedImage espelho(BufferedImage bi) {
+        int w = bi.getWidth();
+        int h = bi.getHeight();
+        BufferedImage temp = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        for (int x = 0; x < w; x++) {
+            for (int y = 0; y < h; y++) {
+                temp.setRGB(w - x - 1, y, bi.getRGB(x, y));
+            }
+        }
+        return temp;
+    }
+    
+    public BufferedImage suavizar (BufferedImage bi) {
+        BufferedImageOp op = null;
+        
+//       float[] data = new float[9];
+//       
+//        try {
+//            for (int i = 0; i < 9; i++) {
+//                data[i] = 1 / 9.0f;
+//            }
+//            Kernel k = new Kernel(3, 3, data);
+//            op = new ConvolveOp(k);
+//        } catch (Exception e) {
+//            //Do something here
+//        }
+//        return (new ConvolveOp(new Kernel(9, 1, data))).filter(bi, null);
+        BufferedImage temp = new BufferedImage(bi.getWidth(null),
+                bi.getHeight(null),
+                BufferedImage.TYPE_INT_BGR);
+
+        Graphics g = temp.getGraphics();
+        g.drawImage(bi, 455, 255, null);
+
+        float[] blurKernel = {
+            1 / 9f, 1 / 9f, 1 / 9f,
+            1 / 9f, 1 / 9f, 1 / 9f,
+            1 / 9f, 1 / 9f, 1 / 9f
+        };
+
+         op = new ConvolveOp(new Kernel(3, 3, blurKernel));
+        
+        return (op.filter(bi, new BufferedImage(bi.getWidth(),
+                bi.getHeight(), bi.getType())));
+    }
+    
+    public BufferedImage realcar (BufferedImage bi) {
+        BufferedImageOp op = null;
+        
+       float[] data = {0.0f, -1.0f, 0.0f, -1.0f, 5.0f, -1.0f, 0.0f, -1.0f, 0.0f};
+       
+        try {
+            Kernel k = new Kernel(3, 3, data);
+            op = new ConvolveOp(k);
+        } catch (Exception e) {
+            //Do something here
+        }
+        return (new ConvolveOp(new Kernel(9, 1, data))).filter(bi, null);
+   
+    }
+    }
+
+    
+    
+    
+    
     //painel do loading
     class PLoading extends JPanel implements Runnable {
 
