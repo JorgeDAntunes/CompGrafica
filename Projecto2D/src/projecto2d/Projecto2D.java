@@ -94,11 +94,11 @@ public class Projecto2D extends JFrame implements ActionListener, ChangeListener
 //        frame.setLayout(new BorderLayout());
 //        frame.setLocationRelativeTo(null); //applet aparecer no centro do ecrã
 //        frame.setResizable(false);
-              
-        
+
+
     }
 
-    private void configurarJanela(){
+    private void configurarJanela() {
         this.setSize(900, 450);
         this.setVisible(true);
         this.setLayout(new BorderLayout());
@@ -106,10 +106,10 @@ public class Projecto2D extends JFrame implements ActionListener, ChangeListener
         this.setResizable(false);
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     }
-    
+
     public void init() {
         configurarJanela();
-        
+
         //******Painel Loading********
 //        pLoaging = new PLoading();
 //        pLoaging.setVisible(true);
@@ -159,7 +159,7 @@ public class Projecto2D extends JFrame implements ActionListener, ChangeListener
         mi = new JMenuItem("Destacar Arestas");
         mi.addActionListener(this);
         menu.add(mi);
-        
+
         mi = new JMenuItem("Espelho");
         mi.addActionListener(this);
         menu.add(mi);
@@ -173,7 +173,7 @@ public class Projecto2D extends JFrame implements ActionListener, ChangeListener
         pj = PrinterJob.getPrinterJob();
         pj.setPrintable(pAJ);
         add(pAJ, BorderLayout.CENTER);
-        
+
         //-----------painel Botões-----------------
         pBotoes = new JPanel();
         pBotoes.setDoubleBuffered(true);
@@ -183,13 +183,13 @@ public class Projecto2D extends JFrame implements ActionListener, ChangeListener
         title = BorderFactory.createTitledBorder("Botões");
         title.setTitleJustification(TitledBorder.CENTER);
         pBotoes.setBorder(title);
-        
+
         //Botao Iniciar
         bIniciar = new JButton("Iniciar");
         bIniciar.addActionListener(this);
         bIniciar.setEnabled(true);
         pBotoes.add(bIniciar);
-        
+
         //adicionar o painel 
         add(pBotoes, BorderLayout.SOUTH);
 
@@ -202,32 +202,32 @@ public class Projecto2D extends JFrame implements ActionListener, ChangeListener
         title = BorderFactory.createTitledBorder("Opções");
         title.setTitleJustification(TitledBorder.RIGHT);
         pOpcoes.setBorder(title);
-        
+
         //Numero de peças
         lNPecas = new JLabel("Número de Peças:");
         pOpcoes.add(lNPecas);
         sNPecas = new JSpinner(new SpinnerNumberModel(3, 3, 8, 1));
         sNPecas.addChangeListener(this);
         pOpcoes.add(sNPecas);
-        
-        
+
+
         //velocidade
         lVelocidade = new JLabel("Velocidade:");
         pOpcoes.add(lVelocidade);
         sVelocidade = new JSlider(10, 100, 50);
         sVelocidade.addChangeListener(this);
         pOpcoes.add(sVelocidade);
-        
+
         //tranparencia
         lTransparencia = new JLabel("Transparencia:");
         pOpcoes.add(lTransparencia);
         sTransparencia = new JSlider(0, 100, 40);
         sTransparencia.addChangeListener(this);
         pOpcoes.add(sTransparencia);
-        
-        
-        
-        
+
+
+
+
         //adicionar painel
         add(pOpcoes, BorderLayout.EAST);
 
@@ -396,7 +396,7 @@ public class Projecto2D extends JFrame implements ActionListener, ChangeListener
             //criar uma imagem para juntar todos os componentes na mesma
             Graphics2D gImage = image.createGraphics();
             Color castanho = new Color(0xA67D3D);
-            
+
             //********************DESENHAR JOGO*************************************
 //            GradientPaint grad = new GradientPaint(100, 50, Color.YELLOW, 400, 500, castanho);
 //            gImage.setPaint(grad);
@@ -561,15 +561,15 @@ public class Projecto2D extends JFrame implements ActionListener, ChangeListener
             gImage.setClip(transformedGlyph);
             gImage.clip(gp);
             gImage.setColor(Color.red);
-            
-            
+
+
             for (int i = 0; i < 2000; i++) {
 //                Shape shape = new Ellipse2D.Double(Math.random() * 500, Math.random() * 400, 30, 20);
                 Shape shape = new Line2D.Double(Math.random() * 300, Math.random() * 300, 30, 20);
 
                 gImage.draw(shape);
             }
-          
+
             glyph = gv2.getOutline(0, 450);
             transformedGlyph = tr.createTransformedShape(glyph);
             gImage.setClip(transformedGlyph);
@@ -601,14 +601,14 @@ public class Projecto2D extends JFrame implements ActionListener, ChangeListener
         }
 
         public int posicaoXPeca(int ficha, int torre) {
-            int k = (torre - 1) * 200 ;
+            int k = (torre - 1) * 200;
             switch (ficha) {
                 case 1:
-                    if(torre == 3){
+                    if (torre == 3) {
                         return 110 + k;
-                    }else{
+                    } else {
                         return 110 + k + velocidade;
-                    }                    
+                    }
                 case 2:
                     return 100 + k;
                 case 3:
@@ -733,12 +733,10 @@ public class Projecto2D extends JFrame implements ActionListener, ChangeListener
 //            System.out.println("torre1: "+torre[1]);
 //            System.out.println("torre2: "+torre[2]);
 //            System.out.println("torre3: "+torre[3]);
-            
         }
 
         @Override
-        public void mousePressed(MouseEvent me) {      
-            
+        public void mousePressed(MouseEvent me) {
         }
 
         @Override
@@ -762,7 +760,6 @@ public class Projecto2D extends JFrame implements ActionListener, ChangeListener
 
         @Override
         public void mouseMoved(MouseEvent me) {
-
         }
 
         @Override
@@ -789,88 +786,86 @@ public class Projecto2D extends JFrame implements ActionListener, ChangeListener
 
             return 0;
         }
-        
-        
-        
+
         //*****EFEITOS DAS IMAGENS**************
-    public BufferedImage arestar(BufferedImage arestar) {
-        AffineTransformOp op = null;
-        BufferedImageOp bio = null;
-        float[] data = {0.0f, -1.0f, 0.0f, -1.0f, 4.0f, -1.0f, 0.0f, -1.0f, 0.0f};
-        try {
-            Kernel k = new Kernel(3, 3, data);
-            bio = new ConvolveOp(k);
-        } catch (Exception e) {
-            //Do something here
+        public BufferedImage arestar(BufferedImage arestar) {
+            AffineTransformOp op = null;
+            BufferedImageOp bio = null;
+            float[] data = {0.0f, -1.0f, 0.0f, -1.0f, 4.0f, -1.0f, 0.0f, -1.0f, 0.0f};
+            try {
+                Kernel k = new Kernel(3, 3, data);
+                bio = new ConvolveOp(k);
+            } catch (Exception e) {
+                //Do something here
+            }
+            return (new ConvolveOp(new Kernel(9, 1, data))).filter(arestar, null);
         }
-        return (new ConvolveOp(new Kernel(9, 1, data))).filter(arestar, null);
-    }
 
-    public BufferedImage Contraste(BufferedImage bi) {
-        BufferedImage temp = new BufferedImage(bi.getWidth(), bi.getHeight(), BufferedImage.TYPE_INT_BGR);
-        int a = 0;
-        int b = 255;
-        int c = 255;
-        int d = 0;
-        Color pixel = null;
+        public BufferedImage Contraste(BufferedImage bi) {
+            BufferedImage temp = new BufferedImage(bi.getWidth(), bi.getHeight(), BufferedImage.TYPE_INT_BGR);
+            int a = 0;
+            int b = 255;
+            int c = 255;
+            int d = 0;
+            Color pixel = null;
 
-        for (int x = 0; x < bi.getWidth(); x++) {
-            for (int y = 0; y < bi.getHeight(); y++) {
-                pixel = new Color(bi.getRGB(x, y));
-                if (pixel.getRed() < c) {
-                    c = pixel.getRed();
+            for (int x = 0; x < bi.getWidth(); x++) {
+                for (int y = 0; y < bi.getHeight(); y++) {
+                    pixel = new Color(bi.getRGB(x, y));
+                    if (pixel.getRed() < c) {
+                        c = pixel.getRed();
+                    }
+                    if (pixel.getRed() > d) {
+                        d = pixel.getRed();
+                    }
                 }
-                if (pixel.getRed() > d) {
-                    d = pixel.getRed();
+            }
+
+            for (int x = 0; x < bi.getWidth(); x++) {
+                for (int y = 0; y < bi.getHeight(); y++) {
+                    pixel = new Color(bi.getRGB(x, y));
+                    int i = (int) ((pixel.getRed() - c) * ((b - a) / (d - c)) + a);
+
+                    Color ci = new Color(i, i, i);
+                    temp.setRGB(x, y, ci.getRGB());
+                    //if (i>100) temp.setRGB(x, y, Color.BLACK.getRGB());
+                    //else temp.setRGB(x, y, Color.WHITE.getRGB()); 
                 }
             }
+            return temp;
         }
 
-        for (int x = 0; x < bi.getWidth(); x++) {
-            for (int y = 0; y < bi.getHeight(); y++) {
-                pixel = new Color(bi.getRGB(x, y));
-                int i = (int) ((pixel.getRed() - c) * ((b - a) / (d - c)) + a);
+        public BufferedImage RGB2GRAY(BufferedImage bi) {
+            BufferedImage temp = new BufferedImage(bi.getWidth(), bi.getHeight(), BufferedImage.TYPE_INT_BGR);
+            for (int x = 0; x < bi.getWidth(); x++) {
+                for (int y = 0; y < bi.getHeight(); y++) {
+                    Color pixel = new Color(bi.getRGB(x, y));
+                    int i = (int) ((pixel.getRed() + pixel.getGreen() + pixel.getBlue()) / 3.0);
 
-                Color ci = new Color(i, i, i);
-                temp.setRGB(x, y, ci.getRGB());
-                //if (i>100) temp.setRGB(x, y, Color.BLACK.getRGB());
-                //else temp.setRGB(x, y, Color.WHITE.getRGB()); 
+                    Color ci = new Color(i, i, i);
+                    temp.setRGB(x, y, ci.getRGB());
+                    //if (i>100) temp.setRGB(x, y, Color.BLACK.getRGB());
+                    //else temp.setRGB(x, y, Color.WHITE.getRGB());
+                }
             }
+            return temp;
         }
-        return temp;
-    }
 
-    public BufferedImage RGB2GRAY(BufferedImage bi) {
-        BufferedImage temp = new BufferedImage(bi.getWidth(), bi.getHeight(), BufferedImage.TYPE_INT_BGR);
-        for (int x = 0; x < bi.getWidth(); x++) {
-            for (int y = 0; y < bi.getHeight(); y++) {
-                Color pixel = new Color(bi.getRGB(x, y));
-                int i = (int) ((pixel.getRed() + pixel.getGreen() + pixel.getBlue()) / 3.0);
-
-                Color ci = new Color(i, i, i);
-                temp.setRGB(x, y, ci.getRGB());
-                //if (i>100) temp.setRGB(x, y, Color.BLACK.getRGB());
-                //else temp.setRGB(x, y, Color.WHITE.getRGB());
+        public BufferedImage espelho(BufferedImage bi) {
+            int w = bi.getWidth();
+            int h = bi.getHeight();
+            BufferedImage temp = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+            for (int x = 0; x < w; x++) {
+                for (int y = 0; y < h; y++) {
+                    temp.setRGB(w - x - 1, y, bi.getRGB(x, y));
+                }
             }
+            return temp;
         }
-        return temp;
-    }
 
-    public BufferedImage espelho(BufferedImage bi) {
-        int w = bi.getWidth();
-        int h = bi.getHeight();
-        BufferedImage temp = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-        for (int x = 0; x < w; x++) {
-            for (int y = 0; y < h; y++) {
-                temp.setRGB(w - x - 1, y, bi.getRGB(x, y));
-            }
-        }
-        return temp;
-    }
-    
-    public BufferedImage suavizar (BufferedImage bi) {
-        BufferedImageOp op = null;
-        
+        public BufferedImage suavizar(BufferedImage bi) {
+            BufferedImageOp op = null;
+
 //       float[] data = new float[9];
 //       
 //        try {
@@ -883,45 +878,41 @@ public class Projecto2D extends JFrame implements ActionListener, ChangeListener
 //            //Do something here
 //        }
 //        return (new ConvolveOp(new Kernel(9, 1, data))).filter(bi, null);
-        BufferedImage temp = new BufferedImage(bi.getWidth(null),
-                bi.getHeight(null),
-                BufferedImage.TYPE_INT_BGR);
+            BufferedImage temp = new BufferedImage(bi.getWidth(null),
+                    bi.getHeight(null),
+                    BufferedImage.TYPE_INT_BGR);
 
-        Graphics g = temp.getGraphics();
-        g.drawImage(bi, 455, 255, null);
+            Graphics g = temp.getGraphics();
+            g.drawImage(bi, 455, 255, null);
 
-        float[] blurKernel = {
-            1 / 9f, 1 / 9f, 1 / 9f,
-            1 / 9f, 1 / 9f, 1 / 9f,
-            1 / 9f, 1 / 9f, 1 / 9f
-        };
+            float[] blurKernel = {
+                1 / 9f, 1 / 9f, 1 / 9f,
+                1 / 9f, 1 / 9f, 1 / 9f,
+                1 / 9f, 1 / 9f, 1 / 9f
+            };
 
-         op = new ConvolveOp(new Kernel(3, 3, blurKernel));
-        
-        return (op.filter(bi, new BufferedImage(bi.getWidth(),
-                bi.getHeight(), bi.getType())));
-    }
-    
-    public BufferedImage realcar (BufferedImage bi) {
-        BufferedImageOp op = null;
-        
-       float[] data = {0.0f, -1.0f, 0.0f, -1.0f, 5.0f, -1.0f, 0.0f, -1.0f, 0.0f};
-       
-        try {
-            Kernel k = new Kernel(3, 3, data);
-            op = new ConvolveOp(k);
-        } catch (Exception e) {
-            //Do something here
+            op = new ConvolveOp(new Kernel(3, 3, blurKernel));
+
+            return (op.filter(bi, new BufferedImage(bi.getWidth(),
+                    bi.getHeight(), bi.getType())));
         }
-        return (new ConvolveOp(new Kernel(9, 1, data))).filter(bi, null);
-   
-    }
+
+        public BufferedImage realcar(BufferedImage bi) {
+            BufferedImageOp op = null;
+
+            float[] data = {0.0f, -1.0f, 0.0f, -1.0f, 5.0f, -1.0f, 0.0f, -1.0f, 0.0f};
+
+            try {
+                Kernel k = new Kernel(3, 3, data);
+                op = new ConvolveOp(k);
+            } catch (Exception e) {
+                //Do something here
+            }
+            return (new ConvolveOp(new Kernel(9, 1, data))).filter(bi, null);
+
+        }
     }
 
-    
-    
-    
-    
     //painel do loading
     class PLoading extends JPanel implements Runnable {
 
