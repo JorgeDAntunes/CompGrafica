@@ -251,19 +251,8 @@ public class Projecto2D extends JFrame implements ActionListener, ChangeListener
             case "Continuar":
                 pAJ.iniciarAnimação();
                 bIniciar.setText("Pausa");
-                break;
-            case "Stop":
-                pAJ = new PAreaJogo();
-                bIniciar.setText("Iniciar");
-                bStop.setEnabled(false);
-                this.setVisible(true);
-                break;
-            case "Sugestão":
-
-                break;
-            case "Solução":
-
-                break;
+                break;            
+            
             case "Imprimir":
                 if (pj.printDialog()) {
                     try {
@@ -363,7 +352,7 @@ public class Projecto2D extends JFrame implements ActionListener, ChangeListener
 //            this.th = th;
             pecas = new Imagem();
             inicializarAnimação();
-            tempo = new Timer(5, this);
+            tempo = new Timer(500, this);
         }
 
         private void inicializarAnimação() {
@@ -590,7 +579,6 @@ public class Projecto2D extends JFrame implements ActionListener, ChangeListener
         }
 
         public void algoritmoHanoi(int m, int origen, int temporal, int destino) {
-//            System.out.println("m: "+m+" origen: "+ origen+" temporal: "+temporal+" destino: "+ destino);
             if (m == 0) {
                 return;
             }
