@@ -167,10 +167,12 @@ public class Projecto3D extends Applet{
         tgTampo.addChild(tgMD);
         tgTampo.addChild(tgME);
         tg.addChild(tgTampo);
+        
+        //Arma e bola
         Node nbola = criarBola();
         TransformGroup tgArm = new TransformGroup();
         Transform3D tfBola = new Transform3D();
-        tfBola.set(new Vector3d(0, -0.98, 0));
+        tfBola.set(new Vector3d(0, -19.5, 2),0.05);
         tgArm.setTransform(tfBola);
         tgArm.addChild(nbola);
         tgArm.addChild(criarArma());
@@ -297,7 +299,7 @@ public class Projecto3D extends Applet{
 //        mArma.rotX(Math.PI / 2);
         mArma.rotY(Math.PI);
 //        tArma.set(mArma, new Vector3d(0.0, -0.98, 0.1), 0.05);
-        tArma.set(mArma, new Vector3d(0.0, 0.0, 0.0), 0.05);
+        tArma.set(mArma, new Vector3d(0.0, 0.0, 0.0), 1.0);
         tgInit.setTransform(tArma);
         tgArma.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
         tgArma.addChild(new Box(1.0f, 1.0f, 0.5f, apArma));
@@ -320,7 +322,7 @@ public class Projecto3D extends Applet{
         float brilho = 20.0f;
         apBola.setMaterial(new Material(corAmb, corEmis, corDiffuse, corSpecular, brilho));
         
-        Sphere bola  =new Sphere(0.02f, apBola);
+        Sphere bola  =new Sphere(0.2f, apBola);
         
         TransformGroup tgBola = new TransformGroup();
         tgBola.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
@@ -331,8 +333,10 @@ public class Projecto3D extends Applet{
         aBola = new Alpha(1, 0, 0, 1000, 0, 0);
         Transform3D tf = new Transform3D();
 //        tf.set(new Vector3d(100.0, -0.98, 0.1));
-        tf.rotY(-Math.PI / 1);
-        piMovBola = new PositionInterpolator(aBola, tgBola, tf, 0.0f, 20.0f);
+//        tf.rotY(Math.PI / 6);
+//        tf.rotX(Math.PI / 4);
+        tf.rotZ(Math.PI / 2);
+        piMovBola = new PositionInterpolator(aBola, tgBola, tf, 0.0f, 50.0f);
         piMovBola.setSchedulingBounds(bounds);
         rootBola.addChild(piMovBola);
         
@@ -461,7 +465,7 @@ class Arma extends Behavior{
                         if(ed < 8){
                             ++ed;                            
                         }
-                        apontarBola.rotY(((ed /32.0)+0.5)*Math.PI);
+                        apontarBola.rotZ(((ed /32.0)+0.5)*Math.PI);
                         apontarArma.rotZ((ed /-32.0)*Math.PI);
                         direcaoBola.setRotation(apontarBola);
                         direcaoArma.setRotation(apontarArma);
@@ -472,7 +476,7 @@ class Arma extends Behavior{
                         if (ed > -8){
                             --ed;
                         }
-                        apontarBola.rotY(((ed /32.0)+0.5)*Math.PI);
+                        apontarBola.rotZ(((ed /32.0)+0.5)*Math.PI);
                         apontarArma.rotZ((ed /(-32.0))*Math.PI);
                         direcaoBola.setRotation(apontarBola);
                         direcaoArma.setRotation(apontarArma);
