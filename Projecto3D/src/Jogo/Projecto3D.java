@@ -26,11 +26,13 @@ import java.util.Enumeration;
 import javax.media.j3d.Alpha;
 import javax.media.j3d.AmbientLight;
 import javax.media.j3d.Appearance;
+import javax.media.j3d.Background;
 import javax.media.j3d.Behavior;
 import javax.media.j3d.BoundingSphere;
 import javax.media.j3d.Bounds;
 import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Canvas3D;
+import javax.media.j3d.ColoringAttributes;
 import javax.media.j3d.DirectionalLight;
 import javax.media.j3d.Locale;
 import javax.media.j3d.Material;
@@ -71,7 +73,7 @@ public class Projecto3D extends Applet implements ActionListener{
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        new MainFrame(new Projecto3D(), 400, 400);
+        new MainFrame(new Projecto3D(), 400, 700);
     }
     
     public void init(){
@@ -114,6 +116,8 @@ public class Projecto3D extends Applet implements ActionListener{
         mt.rotX(Math.PI / -6);
         tf.set(mt, new Vector3d(0.0, 10.0, 10.0),1.0);
         TransformGroup tg = new TransformGroup(tf);
+        tg.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+        tg.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
         ViewPlatform vp = new ViewPlatform();
         PhysicalBody pb = new PhysicalBody();
         PhysicalEnvironment pe = new PhysicalEnvironment();
@@ -123,26 +127,8 @@ public class Projecto3D extends Applet implements ActionListener{
         v.addCanvas3D(c);
         v.attachViewPlatform(vp);
         v.setPhysicalBody(pb);
-        v.setPhysicalEnvironment(pe);        
-        return root;
-        
-    }
-    
-    private BranchGroup conteudoBranch(){
-        BranchGroup root = new BranchGroup();
-        TransformGroup tg = new TransformGroup();
-        tg.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-        tg.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
-        root.addChild(tg);
-        
-        Node nbola = criarBola();
-        root.addChild(nbola);
-        
-        Arma arma = new Arma(aBola, piMovBola, tgArma, bounds);
-        root.addChild(arma);
-        root.addChild(criarArma());
-        
-        
+        v.setPhysicalEnvironment(pe);   
+
         //criar rotação behavior (botão esquerdo do rato)
         MouseRotate behavior = new MouseRotate();
         behavior.setTransformGroup(tg);
@@ -162,6 +148,25 @@ public class Projecto3D extends Applet implements ActionListener{
         root.addChild(behavior3);
         behavior3.setSchedulingBounds(bounds);
         
+        return root;
+        
+    }
+    
+    private BranchGroup conteudoBranch(){
+        BranchGroup root = new BranchGroup();
+        TransformGroup tg = new TransformGroup();
+        tg.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+        tg.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
+        root.addChild(tg);
+        
+        
+        Node nbola = criarBola();
+        root.addChild(nbola);
+        
+        Arma arma = new Arma(aBola, piMovBola, tgArma, bounds);
+        root.addChild(arma);
+        root.addChild(criarArma());
+        
         
         //Luzes
         Color3f corLuzAmb = new Color3f(0.5f, 0.5f, 0.5f);
@@ -174,6 +179,11 @@ public class Projecto3D extends Applet implements ActionListener{
         root.addChild(luzAmb);
         root.addChild(luzDir);
 
+        //background
+        Background background = new Background(0f, 0.5f, 1f);
+        background.setApplicationBounds(bounds);
+        root.addChild(background);
+        
         return root;
     }
     
@@ -196,9 +206,9 @@ public class Projecto3D extends Applet implements ActionListener{
         tgBola.addChild(bola);
         rootBola.addChild(tgBola);
         
-        aBola = new Alpha(1, 0, 0, 500, 0, 0);
+        aBola = new Alpha(1, 0, 0, 1000, 0, 0);
         Transform3D tf = new Transform3D();
-        tf.rotY(Math.PI / 2);
+        tf.rotY(Math.PI / 1);
         piMovBola = new PositionInterpolator(aBola, tgBola, tf, 0.0f, 50.0f);
         piMovBola.setSchedulingBounds(bounds);
         rootBola.addChild(piMovBola);
@@ -231,6 +241,7 @@ public class Projecto3D extends Applet implements ActionListener{
         tgArma.addChild(tgCano);
         rootArma.addChild(tgInit);
         tgInit.addChild(tgArma);
+        
         
         return rootArma;
         
