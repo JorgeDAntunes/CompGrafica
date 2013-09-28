@@ -32,6 +32,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.GraphicsConfiguration;
+import java.awt.TextArea;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -55,12 +56,15 @@ import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
 import javax.swing.*;
 import javax.vecmath.AxisAngle4d;
+import javax.vecmath.AxisAngle4f;
 import javax.vecmath.Color3f;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
+import javax.vecmath.Point4d;
 import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
+import javax.vecmath.Vector4d;
 
 
 /**
@@ -72,6 +76,7 @@ public class Projecto3D extends JApplet implements ActionListener, MouseListener
     private float x = -1.0f;
     private BoundingSphere bounds = new BoundingSphere(new Point3d(0.0, 0.0, 0.0), 100.0);
     public BackgroundSound bSom;
+//    private BranchGroup som = som();
     Alpha aBola;
     PositionInterpolator piMovBola;
     TransformGroup tgArma = new TransformGroup();
@@ -80,6 +85,7 @@ public class Projecto3D extends JApplet implements ActionListener, MouseListener
     Alpha aAlvo;
     Switch sw;
     PickCanvas pc;
+    private int pontos = 0;
     
     /**
      * @param args the command line arguments
@@ -110,13 +116,30 @@ public class Projecto3D extends JApplet implements ActionListener, MouseListener
         
         menuBar.add(menu);
         
-        //Vista
+        JPanel pScore = new JPanel();
         
+        pScore.add(new JLabel("Pontos:"));
+        JTextField tPontos = new JTextField(""+pontos);
+        tPontos.setEditable(false);
+        pScore.add(tPontos);
+        
+        //Vista
         GraphicsConfiguration gc = SimpleUniverse.getPreferredConfiguration();
         Canvas3D cv = new Canvas3D(gc);
         setLayout(new BorderLayout());
         add(cv, BorderLayout.CENTER);
+        add(pScore, BorderLayout.NORTH);
         
+        TextArea ta = new TextArea("", 2, 30, TextArea.SCROLLBARS_NONE);
+        ta.setText("'A':Mover canhão para a esquerda\n");
+        ta.append("'S':Mover canhão para a direita\n");
+        ta.append("'Espaço':disparar bola\n");
+        ta.setEditable(false);
+        add(ta, BorderLayout.SOUTH);
+        
+        
+        
+
         OrbitBehavior orbit;
         SimpleUniverse su = new SimpleUniverse(cv);
         su.getViewingPlatform().setNominalViewingTransform();
@@ -127,10 +150,14 @@ public class Projecto3D extends JApplet implements ActionListener, MouseListener
         pc = new PickCanvas(cv, bg);
         pc.setMode(PickTool.GEOMETRY);
         //inicializar som
-        AudioDevice ad  =new JavaSoundMixer(su.getViewer().getPhysicalEnvironment());
+//        AudioDevice ad  =new JavaSoundMixer(su.getViewer().getPhysicalEnvironment());
 //        AudioDevice ad = su.getViewer().createAudioDevice();
-        ad.initialize();
-        
+//        ad.initialize();
+//        //**SOM**
+//        som.compile();
+//        su.addBranchGraph(som);
+//        System.setProperty("j3d.audiodevice", "com.sun.j3d.audioengines.javasound.JavaSoundMixer");
+//        su.getViewer().createAudioDevice();
         
         TransformGroup tgCamera = su.getViewingPlatform().getMultiTransformGroup().getTransformGroup(0);
         Transform3D tfCamara  =new Transform3D();
@@ -153,11 +180,36 @@ public class Projecto3D extends JApplet implements ActionListener, MouseListener
         
     }
     
+//    public BranchGroup som() {
+//        som = new BranchGroup();
+//
+//        Transform3D trSom3D = new Transform3D();
+//        TransformGroup tgSom = new TransformGroup(trSom3D);
+//        tgSom.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+//        tgSom.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
+//        som.addChild(tgSom);
+//
+//        URL url = this.getClass().getClassLoader().getResource("som/world.wav");
+//        MediaContainer mc = new MediaContainer(url);
+//        mc.setCacheEnable(true);
+//
+//        BoundingSphere soundBounds = new BoundingSphere();
+//        bSom.setSchedulingBounds(soundBounds);
+//
+//        bSom.setSoundData(mc);
+//        bSom.setLoop(Sound.INFINITE_LOOPS);
+//        bSom.setEnable(true);
+//        bSom.setInitialGain(1f);
+//
+//        tgSom.addChild(bSom);
+//
+//        return som;
+//    }
+    
     private BranchGroup createSceneGraph() {
         BranchGroup root = new BranchGroup();
 //        BoundingSphere bounds = new BoundingSphere(new Point3d(0.0, 0.0, 0.0), 100.0);
 //        TransformGroup tg = new TransformGroup();
-        
         
         
         tg.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
@@ -242,21 +294,37 @@ public class Projecto3D extends JApplet implements ActionListener, MouseListener
         tgTampo.addChild(tgME);
         tg.addChild(tgTampo);
         
+        
+        float pos = 0.5f;
         TransformGroup tgArm = new TransformGroup();
-        //Arma e bola
+        //Arma e bola e Alvos
         Node nbola = criarBola();
-//        Node nAlvo = criarAlvos();
-//        tgArm.addChild(nAlvo);
+        Node nAlvo = criarAlvos(0.0f,0.5f,0.1f,3000,-pos,pos);
+        Node nAlvo2 = criarAlvos(0.0f,0.2f,0.1f,2000,pos,-pos);
+        Node nAlvo3 = criarAlvos(0.0f,-0.1f,0.1f,1000,-pos,pos);
+        Node nAlvo4 = criarAlvos2(0.4f,0.4f,0.1f,2000,0,1);
+        Node nAlvo5 = criarAlvos2(-0.5f,0.35f,0.1f,2000,0,1);
+        Node nAlvo6 = criarAlvos2(0.5f,-0.2f,0.1f,1000,0,1);
+        Node nAlvo7 = criarAlvos2(-0.3f,-0.25f,0.1f,1000,0,1);
+        tg.addChild(nAlvo);
+        tg.addChild(nAlvo2);
+        tg.addChild(nAlvo3);
+        tg.addChild(nAlvo4);
+        tg.addChild(nAlvo5);
+        tg.addChild(nAlvo6);
+        tg.addChild(nAlvo7);
         Transform3D tfBola = new Transform3D();
         tfBola.set(new Vector3d(0, -19.5, 2),0.05);
         tgArm.setTransform(tfBola);
         tgArm.addChild(nbola);
         tgArm.addChild(criarArma());
         tg.addChild(tgArm);
-        acertarAlvo acertaAlvo = new acertarAlvo(nbola, swAlvo, aBola, bounds);
+        acertarAlvo acertaAlvo = new acertarAlvo(nAlvo, swAlvo, aBola, bounds);
         Arma arma = new Arma(aBola, piMovBola, tgArma, bounds);
         tg.addChild(arma);
         tg.addChild(acertaAlvo);
+
+        
         
         //Rotação
 //        Alpha alpha = new Alpha(-1, 4000);
@@ -265,7 +333,7 @@ public class Projecto3D extends JApplet implements ActionListener, MouseListener
 //        rodar.setSchedulingBounds(bounds);
 //        tg.addChild(rodar);
         
-        //TEXTO
+        //**********************TEXTO*************************
         //Aparencia Texto, Material:Silver
         Appearance apTexto = new Appearance();
         Material material = new Material();
@@ -304,7 +372,7 @@ public class Projecto3D extends JApplet implements ActionListener, MouseListener
         tg.addChild(tgNome);
         tgNome.addChild(sNome);
         
-        
+ //**********************MOUSEBEHAVIOR/KEYNAVIGATORBEHAVIOR******************
         //criar rotação behavior (botão esquerdo do rato)
         MouseRotate behavior = new MouseRotate();
         behavior.setTransformGroup(tg);
@@ -323,20 +391,38 @@ public class Projecto3D extends JApplet implements ActionListener, MouseListener
         behavior3.setTransformGroup(tg);
         root.addChild(behavior3);
         behavior3.setSchedulingBounds(bounds);
- 
+        
+        
+        KeyNavigatorBehavior behaviorTec = new KeyNavigatorBehavior(tg);
+        behaviorTec.setSchedulingBounds(bounds);
+        tg.addChild(behaviorTec);
+        
+        
+        //**BEHAVIORS PREDEFINIDOS (LOD)**
+        float[] distances = new float[2];
+        distances[0] = 20.0f;
+        distances[1] = 30.0f;
+        DistanceLOD lod = new DistanceLOD(distances);
+        BoundingSphere boundslod = new BoundingSphere(new Point3d(0.0, 0.0, 0.0), 10.0);
+        lod.setSchedulingBounds(boundslod);
+        tg.addChild(lod);
+        
+        
+ //*********************SOM******************************
         //Som background
-        BoundingSphere bsSom = new BoundingSphere(new Point3d(0.0, 0.0, 0.0), 100.0);
-        bSom = new BackgroundSound();
-        URL url = this.getClass().getClassLoader().getResource("som/world.wav");
-        MediaContainer mc = new MediaContainer(url);
-        bSom.setCapability(BackgroundSound.ALLOW_ENABLE_READ);
-        bSom.setCapability(BackgroundSound.ALLOW_ENABLE_WRITE);
-        bSom.setSoundData(mc);
-        bSom.setLoop(Sound.INFINITE_LOOPS);
-        bSom.setSchedulingBounds(bsSom);
-        bSom.setInitialGain(0.1f);
-        bSom.setEnable(true);
-        tg.addChild(bSom);
+//        BoundingSphere bsSom = new BoundingSphere(new Point3d(0.0, 0.0, 0.0), 100.0);
+//        bSom = new BackgroundSound();
+//        URL url = this.getClass().getClassLoader().getResource("som/world.wav");
+//        MediaContainer mc = new MediaContainer(url);
+//        mc.setCacheEnable(true);
+//        bSom.setCapability(BackgroundSound.ALLOW_ENABLE_READ);
+//        bSom.setCapability(BackgroundSound.ALLOW_ENABLE_WRITE);
+//        bSom.setSoundData(mc);
+//        bSom.setLoop(Sound.INFINITE_LOOPS);
+//        bSom.setSchedulingBounds(bsSom);
+//        bSom.setInitialGain(1.0f);
+//        bSom.setEnable(true);
+//        tg.addChild(bSom);
         
         //botao som
         Appearance apSom = criarTexturaAppearance("imagens/som.jpg");
@@ -345,7 +431,7 @@ public class Projecto3D extends JApplet implements ActionListener, MouseListener
         Sphere esferaSom = new Sphere(0.03f, Primitive.ENABLE_GEOMETRY_PICKING 
                 | Primitive.GENERATE_TEXTURE_COORDS, apSom);
         Transform3D tfSom = new Transform3D();
-        tfSom.setTranslation(new Vector3d(0, 0, 0));
+        tfSom.setTranslation(new Vector3f(0.0f, 0.0f, 0.0f));
         TransformGroup tgSom = new TransformGroup(tfSom);
         tgSom.setCapability(TransformGroup.ENABLE_PICK_REPORTING);
         tgSom.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
@@ -379,7 +465,7 @@ public class Projecto3D extends JApplet implements ActionListener, MouseListener
         //Montanha
         
         Shape3D mont = new Shape3D(createGeometry(), ap);
-        
+        GeometryArray gaMont = (GeometryArray) mont.getGeometry();
         Transform3D tfMont = new Transform3D();
         tfMont.setScale(0.08);
         tfMont.setTranslation(new Vector3f(0.5f, 0.8f, 0.16f));
@@ -388,7 +474,12 @@ public class Projecto3D extends JApplet implements ActionListener, MouseListener
         tg.addChild(tgMont);
         tgMont.addChild(mont);
         
-        mont = new Shape3D(createGeometry(), ap);
+        //sombra
+        
+        
+        //montanha2
+        
+        Shape3D mont2 = new Shape3D(createGeometry(), ap);
         
         Transform3D tfMont2 = new Transform3D();
         tfMont2.setScale(0.08);
@@ -396,11 +487,14 @@ public class Projecto3D extends JApplet implements ActionListener, MouseListener
         tfMont2.setRotation(new AxisAngle4d(new Vector3d(1, 0, 0),Math.PI/2));
         TransformGroup tgMont2 = new TransformGroup(tfMont2);
         tg.addChild(tgMont2);
-        tgMont2.addChild(mont);
+        tgMont2.addChild(mont2);
+        
+        //sombra
         
         
+        //montanha3        
         
-        mont = new Shape3D(createGeometry(), ap);
+        Shape3D mont3 = new Shape3D(createGeometry(), ap);
         
         Transform3D tfMont3 = new Transform3D();
         tfMont3.setScale(0.08);
@@ -408,7 +502,7 @@ public class Projecto3D extends JApplet implements ActionListener, MouseListener
         tfMont3.setRotation(new AxisAngle4d(new Vector3d(1, 0, 0),Math.PI/2));
         TransformGroup tgMont3 = new TransformGroup(tfMont3);
         tg.addChild(tgMont3);
-        tgMont3.addChild(mont);
+        tgMont3.addChild(mont3);
         
         ptsFountain = new PointParticles(30000, 80);   // time delay
 
@@ -425,7 +519,12 @@ public class Projecto3D extends JApplet implements ActionListener, MouseListener
         partBeh2.setSchedulingBounds(bounds);
         tg.addChild(partBeh2);
         
-        mont = new Shape3D(createGeometry(), ap);
+        //sombra
+        
+        
+        //montanha2
+        
+        Shape3D mont4 = new Shape3D(createGeometry(), ap);
         
         Transform3D tfMont4 = new Transform3D();
         tfMont4.setScale(0.08);
@@ -433,7 +532,7 @@ public class Projecto3D extends JApplet implements ActionListener, MouseListener
         tfMont4.setRotation(new AxisAngle4d(new Vector3d(1, 0, 0),Math.PI/2));
         TransformGroup tgMont4 = new TransformGroup(tfMont4);
         tg.addChild(tgMont4);
-        tgMont4.addChild(mont);
+        tgMont4.addChild(mont4);
         
         
         
@@ -549,12 +648,55 @@ public class Projecto3D extends JApplet implements ActionListener, MouseListener
         ptlight2.setInfluencingBounds(bounds);
         root.addChild(ptlight2);
 
-
+        
         
         return root;
         
     }
       
+    
+    private GeometryArray createShadow(GeometryArray ga, Point3f light, Point3f plane) {
+        GeometryInfo gi = new GeometryInfo(ga);
+        gi.convertToIndexedTriangles();
+        IndexedTriangleArray ita = (IndexedTriangleArray) gi.getIndexedGeometryArray();
+        Vector3f v = new Vector3f();
+        v.sub(plane, light);
+        double[] mat = new double[16];
+        for (int i = 0; i < 16; i++) {
+            mat[i] = 0;
+        }
+        mat[0] = 1;
+        mat[5] = 1;
+        mat[10] = 1 - 0.001;
+        mat[14] = -1 / v.length();
+        Transform3D proj = new Transform3D();
+        proj.set(mat);
+        Transform3D u = new Transform3D();
+        u.lookAt(new Point3d(light), new Point3d(plane), new Vector3d(0, 1, 0));
+        proj.mul(u);
+        Transform3D tr = new Transform3D();
+        u.invert();
+        tr.mul(u, proj);
+        int n = ita.getVertexCount();
+        int count = ita.getIndexCount();
+        IndexedTriangleArray shadow = new IndexedTriangleArray(n,
+                GeometryArray.COORDINATES, count);
+        for (int i = 0; i < n; i++) {
+            Point3d p = new Point3d();
+            ga.getCoordinate(i, p);
+            Vector4d v4 = new Vector4d(p);
+            v4.w = 1;
+            tr.transform(v4);
+            Point4d p4 = new Point4d(v4);
+            p.project(p4);
+            shadow.setCoordinate(i, p);
+        }
+        int[] indices = new int[count];
+        ita.getCoordinateIndices(0, indices);
+        shadow.setCoordinateIndices(0, indices);
+        return shadow;
+    }
+    
     private BranchGroup criarArma(){
         BranchGroup rootArma = new BranchGroup();
         Appearance apArma = new Appearance();
@@ -639,74 +781,94 @@ public class Projecto3D extends JApplet implements ActionListener, MouseListener
         return rootBola;
     }
     
-    private BranchGroup criarAlvos(){
+    private BranchGroup criarAlvos(float x, float y, float z, int vel, float inicio, float fim){
         BranchGroup rootAlvo = new BranchGroup();
         swAlvo = new Switch(0);
         swAlvo.setCapability(Switch.ALLOW_SWITCH_WRITE);
         
-        // blue
-        Appearance blueApp = new Appearance();
-        blueApp.setCapability(Appearance.ALLOW_COLORING_ATTRIBUTES_WRITE);
-        Color3f blueColor = new Color3f(0.3f, 0.3f, 1.0f);
-        ColoringAttributes blueCA = new ColoringAttributes();
-        blueCA.setColor(blueColor);
-        blueApp.setColoringAttributes(blueCA);
-        
-         //Criar Bola
-        Sphere bola = new Sphere(0.2f, blueApp);
-        bola.setCapability(Appearance.ALLOW_COLORING_ATTRIBUTES_WRITE);
         
         
-        TransformGroup tgRotAlvo = new TransformGroup();
-        Transform3D tfRotAlvo = new Transform3D();
-        Matrix3d mRotAlvo = new Matrix3d();
-        mRotAlvo.rotY(Math.PI / 2);
-        tfRotAlvo.set(mRotAlvo, new Vector3d(0.0, 0.0, -30.0), 1.0);
-        tgRotAlvo.setTransform(tfRotAlvo);
-        tgRotAlvo.addChild(bola);
-        swAlvo.addChild(tgRotAlvo);
-
+        //Aparencia
+        Appearance apAlvo = criarTexturaAppearance("imagens/alvo.jpg");
+        apAlvo.setMaterial(new Material());
+        
+        Box alvo1 = new Box(1, 1, 0.01f, Primitive.GENERATE_TEXTURE_COORDS, apAlvo);
+        
+         
+        //Alvo1
+        Transform3D tfAlvo = new Transform3D();
+        tfAlvo.set(new Vector3f(0.0f, 0.0f, 0.0f), 0.1f);
+        tfAlvo.setRotation(new AxisAngle4d(new Vector3d(1, 0, 0), Math.PI/2));
+        tfAlvo.setTranslation(new Vector3f(x, y, z));
+        TransformGroup tgAlvo = new TransformGroup(tfAlvo);
+//        rootAlvo.addChild(tgAlvo);
+        tgAlvo.addChild(swAlvo);
+        swAlvo.addChild(alvo1);
+        
+        
         TransformGroup tgMovAlvo = new TransformGroup();
         tgMovAlvo.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
         tgMovAlvo.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+        tgMovAlvo.addChild(tgAlvo);
         
-        aAlvo = new Alpha(-1, 0, 0, 3000, 0, 0);
-        Transform3D tf = new Transform3D();
-        PositionInterpolator piMovAlvo = new PositionInterpolator(aBola, tgMovAlvo, tf, -30.0f, 30.0f);
+        aAlvo = new Alpha(-1, 0, 0, vel, 0, 0);
+        Transform3D tfMovAlvo = new Transform3D();
+        PositionInterpolator piMovAlvo = new PositionInterpolator(aAlvo, tgMovAlvo, 
+                tfMovAlvo, inicio, fim);
+
         piMovAlvo.setSchedulingBounds(bounds);
         rootAlvo.addChild(piMovAlvo);
         rootAlvo.addChild(tgMovAlvo);
-        
-        
-        
-//        TransformGroup tgBola = new TransformGroup();
-//        tgBola.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-//        
-//        Transform3D trBola = new Transform3D();
-//        trBola.setTranslation(new Vector3f(0f, 0.0f, 0.05f));
-//        trBola.setRotation(new AxisAngle4d(1.0, 0.0, 0.0, Math.PI / 2.0));
-//        tgBola.setTransform(trBola);        
-//        
-//        Sphere bola = new Sphere(0.2f, blueApp);
-//        bola.setCapability(Appearance.ALLOW_COLORING_ATTRIBUTES_WRITE);
-//        tgBola.addChild(bola);
-////        tgBola.addChild(swAlvo);
-//        swAlvo.addChild(tgBola);
-//        
-//        TransformGroup tgAnim = new TransformGroup();
-//        tgAnim.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
-//        tgAnim.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-//        tgAnim.addChild(tgBola);
-//        
-//        aAlvo = new Alpha(-1, 0, 0, 200, 0, 0);
-//        Transform3D tfAnim = new Transform3D();
-//        PositionInterpolator piAlvo = new PositionInterpolator(aBola, tgAnim, tfAnim, -30.0f, 30.0f);
-//        piAlvo.setSchedulingBounds(bounds);
-//        rootAlvo.addChild(piAlvo);
-//        rootAlvo.addChild(tgAnim);
+                
+
         
         return rootAlvo;
     }
+    
+    private BranchGroup criarAlvos2(float x, float y, float z, int vel, float inicio, float fim){
+        BranchGroup rootAlvo = new BranchGroup();
+        swAlvo = new Switch(0);
+        swAlvo.setCapability(Switch.ALLOW_SWITCH_WRITE);
+        
+        
+        
+        //Aparencia
+        Appearance apAlvo = criarTexturaAppearance("imagens/alvo.jpg");
+        apAlvo.setMaterial(new Material());
+        
+        Box alvo1 = new Box(1, 1, 0.01f, Primitive.GENERATE_TEXTURE_COORDS, apAlvo);
+        
+        
+         
+        //Alvo1
+        Transform3D tfAlvo = new Transform3D();
+        tfAlvo.set(new Vector3f(0.0f, 0.0f, 0.0f), 0.1f);
+        tfAlvo.setRotation(new AxisAngle4d(new Vector3d(1, 0, 0), Math.PI/2));
+        tfAlvo.setTranslation(new Vector3f(x, y, z));
+        TransformGroup tgAlvo = new TransformGroup(tfAlvo);
+//        rootAlvo.addChild(tgAlvo);
+        tgAlvo.addChild(swAlvo);
+        swAlvo.addChild(alvo1);
+        
+        
+        TransformGroup tgMovAlvo = new TransformGroup();
+        tgMovAlvo.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
+        tgMovAlvo.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+        tgMovAlvo.addChild(tgAlvo);
+        
+        aAlvo = new Alpha(-1, 0, 0, vel, 0, 0);
+        Transform3D tfMovAlvo = new Transform3D();
+        ScaleInterpolator siMovAlvo = new ScaleInterpolator(aAlvo, tgMovAlvo, 
+                tfMovAlvo, inicio, fim);
+        siMovAlvo.setSchedulingBounds(bounds);
+        rootAlvo.addChild(siMovAlvo);
+        rootAlvo.addChild(tgMovAlvo);
+                
+
+        
+        return rootAlvo;
+    }
+    
    
     private Appearance criarTexturaAppearance(String caminho){
         Appearance ap = new Appearance();
@@ -727,9 +889,10 @@ public class Projecto3D extends JApplet implements ActionListener, MouseListener
     Background criarBackground(){
         Background fundo = new Background();
         BranchGroup bg = new BranchGroup();
+        Appearance ap = new Appearance();
         Sphere s = new Sphere(0.1f, Sphere.GENERATE_NORMALS | Sphere.GENERATE_NORMALS_INWARD
-                | Sphere.GENERATE_TEXTURE_COORDS, 60);
-        Appearance ap = s.getAppearance();
+                | Sphere.GENERATE_TEXTURE_COORDS, ap);
+//        Appearance ap = s.getAppearance();
         bg.addChild(s);
         fundo.setGeometry(bg);
         
@@ -853,11 +1016,17 @@ class acertarAlvo extends Behavior{
         Node n;
         if(wakCri instanceof WakeupOnCollisionEntry){
             //existe uma colisao
-            if(alvo == false){
-//                sw.setWhichChild(1);
-//                alvo = true;
+//            n = ((WakeupOnCollisionEntry) wakCri)
+//                    .getTriggeringPath().getObject();
+//            System.out.println("Collided with " + n.getUserData());            
+            
+            
+            
+//            if(alvo == false){
+////                sw.setWhichChild(1);
+////                alvo = true;
                 System.out.println("colisão");
-            }
+//            }
 
         }else if(wakCri instanceof WakeupOnElapsedTime){
             //não existe colição
@@ -914,7 +1083,7 @@ class Arma extends Behavior{
                 //verificar se é um evento do teclado
                 if(evento[0] instanceof KeyEvent){
                     int tecla = ((KeyEvent) evento[0]).getKeyCode();
-                    if(tecla == KeyEvent.VK_LEFT){
+                    if(tecla == KeyEvent.VK_A){
                         //tecla seta esquerda premida
                         if(ed < 8){
                             ++ed;                            
@@ -925,7 +1094,7 @@ class Arma extends Behavior{
                         direcaoArma.setRotation(apontarArma);
                         tgArma.setTransform(direcaoArma);
                         piBola.setAxisOfTranslation(direcaoBola);
-                    }else if (tecla == KeyEvent.VK_RIGHT){
+                    }else if (tecla == KeyEvent.VK_S){
                         //tecla seta direita premida
                         if (ed > -8){
                             --ed;
@@ -939,31 +1108,7 @@ class Arma extends Behavior{
                     } else if(tecla == KeyEvent.VK_SPACE){
                         //tecla espaço premida
                         dispararBola.setStartTime(System.currentTimeMillis());
-                    }else if(tecla == KeyEvent.VK_DOWN){
-                        //tecla seta baixo premida
-                        if(cb < 8){
-                            ++cb;                            
-                        }
-                        System.out.println("Baixo: "+cb);
-                        apontarBola.rotZ(((cb /32.0)+0.5)*Math.PI);
-                        apontarArma.rotX((cb /-32.0)*Math.PI);
-                        direcaoBola.setRotation(apontarBola);
-                        direcaoArma.setRotation(apontarArma);
-                        tgArma.setTransform(direcaoArma);
-                        piBola.setAxisOfTranslation(direcaoBola);
-                    }//else if(tecla == KeyEvent.VK_UP){
-//                        //tecla seta cima premida
-//                        if (cb > -8){
-//                            --cb;
-//                        }
-//                        System.out.println("Cima: "+cb);
-//                        apontarBola.rotZ(((cb /32.0)+0.5)*Math.PI);
-//                        apontarArma.rotX((cb /(-32.0))*Math.PI);
-//                        direcaoBola.setRotation(apontarBola);
-//                        direcaoArma.setRotation(apontarArma);
-//                        tgArma.setTransform(direcaoArma);
-//                        piBola.setAxisOfTranslation(direcaoBola);
-//                    }
+                    }
                 }
             }
         }
