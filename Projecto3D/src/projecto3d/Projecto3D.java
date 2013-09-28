@@ -8,15 +8,21 @@ import com.sun.j3d.audioengines.javasound.JavaSoundMixer;
 import com.sun.j3d.loaders.Scene;
 import com.sun.j3d.loaders.objectfile.ObjectFile;
 import com.sun.j3d.utils.applet.MainFrame;
+import com.sun.j3d.utils.behaviors.keyboard.KeyNavigatorBehavior;
 import com.sun.j3d.utils.behaviors.mouse.MouseRotate;
 import com.sun.j3d.utils.behaviors.mouse.MouseTranslate;
 import com.sun.j3d.utils.behaviors.mouse.MouseZoom;
 import com.sun.j3d.utils.behaviors.vp.OrbitBehavior;
 import com.sun.j3d.utils.geometry.Box;
 import com.sun.j3d.utils.geometry.Cylinder;
+import com.sun.j3d.utils.geometry.GeometryInfo;
+import com.sun.j3d.utils.geometry.NormalGenerator;
 import com.sun.j3d.utils.geometry.Primitive;
 import com.sun.j3d.utils.geometry.Sphere;
 import com.sun.j3d.utils.image.TextureLoader;
+import com.sun.j3d.utils.picking.PickCanvas;
+import com.sun.j3d.utils.picking.PickResult;
+import com.sun.j3d.utils.picking.PickTool;
 import com.sun.j3d.utils.universe.SimpleUniverse;
 import com.sun.j3d.utils.universe.ViewingPlatform;
 import com.sun.org.apache.bcel.internal.classfile.Code;
@@ -61,7 +67,7 @@ import javax.vecmath.Vector3f;
  *
  * @author Jorge
  */
-public class Projecto3D extends JApplet implements ActionListener{
+public class Projecto3D extends JApplet implements ActionListener, MouseListener{
 
     private float x = -1.0f;
     private BoundingSphere bounds = new BoundingSphere(new Point3d(0.0, 0.0, 0.0), 100.0);
@@ -72,6 +78,8 @@ public class Projecto3D extends JApplet implements ActionListener{
     TransformGroup tg = new TransformGroup();
     Switch swAlvo;
     Alpha aAlvo;
+    Switch sw;
+    PickCanvas pc;
     
     /**
      * @param args the command line arguments
@@ -85,7 +93,7 @@ public class Projecto3D extends JApplet implements ActionListener{
         JMenuBar menuBar = new JMenuBar();
         setJMenuBar(menuBar);
         
-        //menu opções
+//        menu opções
         JMenu menu = new JMenu("Opções");
         
         JMenuItem menuItem = new JMenuItem("Ligar Som");
@@ -116,9 +124,11 @@ public class Projecto3D extends JApplet implements ActionListener{
         BranchGroup bg = createSceneGraph();
         bg.compile();
         su.addBranchGraph(bg);
-        
+        pc = new PickCanvas(cv, bg);
+        pc.setMode(PickTool.GEOMETRY);
         //inicializar som
         AudioDevice ad  =new JavaSoundMixer(su.getViewer().getPhysicalEnvironment());
+//        AudioDevice ad = su.getViewer().createAudioDevice();
         ad.initialize();
         
         
@@ -148,16 +158,21 @@ public class Projecto3D extends JApplet implements ActionListener{
 //        BoundingSphere bounds = new BoundingSphere(new Point3d(0.0, 0.0, 0.0), 100.0);
 //        TransformGroup tg = new TransformGroup();
         
+        
+        
         tg.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
         tg.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
         root.addChild(tg);
         
-//        //Object
-//        Appearance ap = new Appearance();
-//        ap.setMaterial(new Material());
-//        ColoringAttributes ca = new ColoringAttributes();
-//        ca.setShadeModel(ColoringAttributes.SHADE_GOURAUD);
-//        ap.setColoringAttributes(ca);
+        //Object
+        Appearance ap = new Appearance();
+        ap.setMaterial(new Material());
+        ap.setCapability(Appearance.ALLOW_POINT_ATTRIBUTES_WRITE);
+        ap.setCapability(Appearance.ALLOW_LINE_ATTRIBUTES_WRITE);
+        ap.setCapability(Appearance.ALLOW_POLYGON_ATTRIBUTES_WRITE);
+        ColoringAttributes ca = new ColoringAttributes();
+        ca.setShadeModel(ColoringAttributes.SHADE_GOURAUD);
+        ap.setColoringAttributes(ca);
 //                
 //        // blue
 //        Appearance blueApp = new Appearance();
@@ -327,25 +342,109 @@ public class Projecto3D extends JApplet implements ActionListener{
         Appearance apSom = criarTexturaAppearance("imagens/som.jpg");
         apSom.setMaterial(new Material());
         
-        Sphere esferaSom = new Sphere(0.03f, Primitive.ENABLE_GEOMETRY_PICKING | Primitive.GENERATE_TEXTURE_COORDS, apSom);
+        Sphere esferaSom = new Sphere(0.03f, Primitive.ENABLE_GEOMETRY_PICKING 
+                | Primitive.GENERATE_TEXTURE_COORDS, apSom);
         Transform3D tfSom = new Transform3D();
-        tfSom.setTranslation(new Vector3d(0, 0, 1));
+        tfSom.setTranslation(new Vector3d(0, 0, 0));
         TransformGroup tgSom = new TransformGroup(tfSom);
         tgSom.setCapability(TransformGroup.ENABLE_PICK_REPORTING);
         tgSom.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
         tg.addChild(tgSom);
         tgSom.addChild(esferaSom);
         
+        //billboard
+        Billboard b = new Billboard(tgSom, Billboard.ROTATE_ABOUT_AXIS, new Vector3f(1f, 1f, 1f));
+        b.setSchedulingBounds(bounds);
+        tgSom.addChild(b);
         
         
         
-        //luz Azul
-        Appearance lAzul = new Appearance();
-        lAzul.setCapability(Appearance.ALLOW_COLORING_ATTRIBUTES_WRITE);
-        Color3f cLAzul = new Color3f(0.5f, 1.0f, 1.0f);
-        ColoringAttributes caLAzul = new ColoringAttributes();
-        caLAzul.setColor(cLAzul);
-        lAzul.setColoringAttributes(caLAzul);
+         //Particulas
+        PointParticles ptsFountain = new PointParticles(30000, 80);   // time delay
+
+        TransformGroup tgPart = new TransformGroup();
+        Transform3D tfPArt = new Transform3D();
+        tfPArt.setScale(0.08);
+        tfPArt.setRotation(new AxisAngle4d(new Vector3d(1, 0, 0),Math.PI/2));
+        tfPArt.setTranslation(new Vector3d(2.1f, 0.0f, 0.0f));
+        tgPart.setTransform(tfPArt);
+        tgPart.addChild(ptsFountain);
+        tg.addChild(tgPart);
+
+        Behavior partBeh = ptsFountain.getParticleBeh();
+        partBeh.setSchedulingBounds(bounds);
+        tg.addChild(partBeh);
+        
+        
+        //Montanha
+        
+        Shape3D mont = new Shape3D(createGeometry(), ap);
+        
+        Transform3D tfMont = new Transform3D();
+        tfMont.setScale(0.08);
+        tfMont.setTranslation(new Vector3f(0.5f, 0.8f, 0.16f));
+        tfMont.setRotation(new AxisAngle4d(new Vector3d(1, 0, 0),Math.PI/2));
+        TransformGroup tgMont = new TransformGroup(tfMont);
+        tg.addChild(tgMont);
+        tgMont.addChild(mont);
+        
+        mont = new Shape3D(createGeometry(), ap);
+        
+        Transform3D tfMont2 = new Transform3D();
+        tfMont2.setScale(0.08);
+        tfMont2.setTranslation(new Vector3f(0.17f, 0.8f, 0.16f));
+        tfMont2.setRotation(new AxisAngle4d(new Vector3d(1, 0, 0),Math.PI/2));
+        TransformGroup tgMont2 = new TransformGroup(tfMont2);
+        tg.addChild(tgMont2);
+        tgMont2.addChild(mont);
+        
+        
+        
+        mont = new Shape3D(createGeometry(), ap);
+        
+        Transform3D tfMont3 = new Transform3D();
+        tfMont3.setScale(0.08);
+        tfMont3.setTranslation(new Vector3f(-0.15f, 0.8f, 0.16f));
+        tfMont3.setRotation(new AxisAngle4d(new Vector3d(1, 0, 0),Math.PI/2));
+        TransformGroup tgMont3 = new TransformGroup(tfMont3);
+        tg.addChild(tgMont3);
+        tgMont3.addChild(mont);
+        
+        ptsFountain = new PointParticles(30000, 80);   // time delay
+
+        TransformGroup tgPart2 = new TransformGroup();
+        Transform3D tfPArt2 = new Transform3D();
+        tfPArt2.setScale(0.08);
+        tfPArt2.setRotation(new AxisAngle4d(new Vector3d(1, 0, 0),Math.PI/2));
+        tfPArt2.setTranslation(new Vector3d(1.1f, 0.0f, 0.0f));
+        tgPart2.setTransform(tfPArt2);
+        tgPart2.addChild(ptsFountain);
+        tg.addChild(tgPart2);
+
+        Behavior partBeh2 = ptsFountain.getParticleBeh();
+        partBeh2.setSchedulingBounds(bounds);
+        tg.addChild(partBeh2);
+        
+        mont = new Shape3D(createGeometry(), ap);
+        
+        Transform3D tfMont4 = new Transform3D();
+        tfMont4.setScale(0.08);
+        tfMont4.setTranslation(new Vector3f(-0.5f, 0.8f, 0.16f));
+        tfMont4.setRotation(new AxisAngle4d(new Vector3d(1, 0, 0),Math.PI/2));
+        TransformGroup tgMont4 = new TransformGroup(tfMont4);
+        tg.addChild(tgMont4);
+        tgMont4.addChild(mont);
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         
         //Criar Bola
 //        
@@ -413,29 +512,45 @@ public class Projecto3D extends JApplet implements ActionListener{
 //        tgAnim.addChild(tgBola);   
 //        tg.addChild(tgBola);
          
+        
         //Fundo
-        Background bb = new Background(1f, 1f, 1f);
+        Background bb = criarBackground();
         bb.setApplicationBounds(bounds);
         root.addChild(bb);
-        
-        
-     
-        
+      
         //Luz
-        AmbientLight luz = new AmbientLight(true, new Color3f(Color.WHITE));
-        luz.setInfluencingBounds(bounds);
-        root.addChild(luz);
+        //AMBIENT
+        AmbientLight aLight = new AmbientLight(true, new Color3f(Color.BLUE));
+        aLight.setInfluencingBounds(bounds);
+        aLight.setCapability(PointLight.ALLOW_STATE_WRITE | PointLight.ALLOW_STATE_WRITE);
+        root.addChild(aLight);
         
-        //cor
-        PointLight ptlight = new PointLight(new Color3f(Color.red),
+        //DIRECIONAL
+        DirectionalLight dLight = new DirectionalLight(new Color3f(0.3f, 0.15f, 0.0f), new Vector3f(0f, -1f, 0f));
+        dLight.setCapability(PointLight.ALLOW_STATE_WRITE | PointLight.ALLOW_STATE_WRITE);
+        dLight.setInfluencingBounds(bounds);
+        root.addChild(dLight);
+        
+        //SPORTLIGHT
+        SpotLight sLight = new SpotLight(new Color3f(Color.GREEN), new Point3f(0.7f, 0.7f, 0.7f), new Point3f(1f, 0f, 0f), new Vector3f(-1.1f,-0.8f,-0.7f), (float) (Math.PI / 6.0), 0f);
+        sLight.setCapability(PointLight.ALLOW_STATE_WRITE | PointLight.ALLOW_STATE_WRITE);
+        sLight.setInfluencingBounds(bounds);
+        root.addChild(sLight);
+        
+        //PONTUAl
+        PointLight ptlight = new PointLight(new Color3f(Color.RED),
                 new Point3f(0f, 0f, 2f), new Point3f(1f, 0f, 0f));
+        ptlight.setCapability(PointLight.ALLOW_STATE_WRITE | PointLight.ALLOW_STATE_WRITE);
         ptlight.setInfluencingBounds(bounds);
         root.addChild(ptlight);
-        PointLight ptlight2 = new PointLight(new Color3f(Color.red),
-                new Point3f(-2f, 2f, 2f), new Point3f(1f, 0f, 0f));
+        PointLight ptlight2 = new PointLight(new Color3f(Color.RED),
+                new Point3f(0f, 2f, 2f), new Point3f(1f, 0f, 0f));
+        ptlight2.setCapability(PointLight.ALLOW_STATE_WRITE | PointLight.ALLOW_STATE_WRITE);
         ptlight2.setInfluencingBounds(bounds);
         root.addChild(ptlight2);
 
+
+        
         return root;
         
     }
@@ -449,6 +564,19 @@ public class Projecto3D extends JApplet implements ActionListener{
         Color3f corDiffuse = new Color3f(0.5f, 0.5f, 0.5f);
         float brilho = 20.0f;
         apArma.setMaterial(new Material(corAmb, corEmis, corDiffuse, corSpecular, brilho));
+        
+        Cylinder cyl = new Cylinder(0.3f, 2.0f,Primitive.ENABLE_GEOMETRY_PICKING 
+                | Primitive.GENERATE_NORMALS, apArma);
+
+        Switch s = new Switch();
+        s.setCapability(Switch.ENABLE_PICK_REPORTING);
+        s.setCapability(Switch.ALLOW_SWITCH_READ);
+        s.setCapability(Switch.ALLOW_SWITCH_WRITE);
+        s.addChild(cyl);
+        
+        
+        
+        
         TransformGroup tgInit = new TransformGroup();
         TransformGroup tgCano = new TransformGroup();
         Transform3D tArma = new Transform3D();
@@ -463,10 +591,18 @@ public class Projecto3D extends JApplet implements ActionListener{
         tgInit.setTransform(tArma);
         tgArma.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
         tgArma.addChild(new Box(1.0f, 1.0f, 0.5f, apArma));
-        tgCano.addChild(new Cylinder(0.3f, 2.0f, apArma));
+        tgCano.addChild(s);
+        
         tgArma.addChild(tgCano);
+        Box box = new Box(0.3f, 2.0f, 0.3f,Primitive.ENABLE_GEOMETRY_PICKING 
+                | Primitive.GENERATE_NORMALS, apArma);
+        s.addChild(box);
+        s.setWhichChild(0);
         rootArma.addChild(tgInit);
         tgInit.addChild(tgArma);   
+        
+        
+        
         
         return rootArma;        
     }
@@ -587,6 +723,63 @@ public class Projecto3D extends JApplet implements ActionListener{
         ap.setTexture(texture);       
         return ap;                
     }
+    
+    Background criarBackground(){
+        Background fundo = new Background();
+        BranchGroup bg = new BranchGroup();
+        Sphere s = new Sphere(0.1f, Sphere.GENERATE_NORMALS | Sphere.GENERATE_NORMALS_INWARD
+                | Sphere.GENERATE_TEXTURE_COORDS, 60);
+        Appearance ap = s.getAppearance();
+        bg.addChild(s);
+        fundo.setGeometry(bg);
+        
+        URL url = getClass().getClassLoader().getResource("imagens/fundo.jpg");
+        TextureLoader tl = new TextureLoader(url, this);
+        Texture t = tl.getTexture();
+        ap.setTexture(t);
+        return  fundo;
+                
+    }
+    
+    private Geometry createGeometry() {
+        int m = 30;
+        int n = 30;
+        Point3f[] pts = new Point3f[m * n];
+        int idx = 0;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                float x = (i - m / 2) * 0.2f;
+                float z = (j - n / 2) * 0.2f;
+                float y = 1.5f * (float) (Math.cos(x * x * z * z * z * z * z * z * z * z * z * z) + Math.sin(z * z) + Math.sin(x * x) + Math.cos(z * z))
+                        / ((float) Math.exp(0.35 * (x * x + z * z))) - 2.0f;
+                pts[idx++] = new Point3f(x, y, z);
+            }
+        }
+
+        int[] coords = new int[2 * n * (m - 1)];
+        idx = 0;
+        for (int i = 1; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                coords[idx++] = i * n + j;
+                coords[idx++] = (i - 1) * n + j;
+            }
+        }
+
+        int[] stripCounts = new int[m - 1];
+        for (int i = 0; i < m - 1; i++) {
+            stripCounts[i] = 2 * n;
+        }
+
+        GeometryInfo gi = new GeometryInfo(GeometryInfo.TRIANGLE_STRIP_ARRAY);
+        gi.setCoordinates(pts);
+        gi.setCoordinateIndices(coords);
+        gi.setStripCounts(stripCounts);
+
+        NormalGenerator ng = new NormalGenerator();
+        ng.generateNormals(gi);
+
+        return gi.getGeometryArray();
+    }
 
     @Override
     public void actionPerformed(ActionEvent ae) {
@@ -599,6 +792,31 @@ public class Projecto3D extends JApplet implements ActionListener{
             bSom.setEnable(false);
         }
     }
+
+    @Override
+    public void mouseClicked(MouseEvent me) {
+        pc.setShapeLocation(me);
+        
+        PickResult pr = pc.pickClosest();
+        if(pr != null){
+            sw = (Switch) (pr.getNode(PickResult.SWITCH));
+            if(sw!= null){
+                sw.setWhichChild(1-sw.getWhichChild());
+            }
+        }
+    }
+
+    @Override
+    public void mousePressed(MouseEvent me) {}
+
+    @Override
+    public void mouseReleased(MouseEvent me) {}
+
+    @Override
+    public void mouseEntered(MouseEvent me) {}
+
+    @Override
+    public void mouseExited(MouseEvent me) {}
   
 
 }
@@ -636,16 +854,16 @@ class acertarAlvo extends Behavior{
         if(wakCri instanceof WakeupOnCollisionEntry){
             //existe uma colisao
             if(alvo == false){
-                sw.setWhichChild(1);
-                alvo = true;
+//                sw.setWhichChild(1);
+//                alvo = true;
                 System.out.println("colisão");
             }
 
         }else if(wakCri instanceof WakeupOnElapsedTime){
             //não existe colição
             if(alpha.value() < 0.1){
-                sw.setWhichChild(0);
-                alvo = true;
+//                sw.setWhichChild(0);
+//                alvo = true;
 //                System.out.println("Não colisão");
             }
 
